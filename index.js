@@ -16,43 +16,44 @@ class Noeud {
     addStationAdjacente(stationsAdjacentes) {
         this.stationsAdjacentes = this.stationsAdjacentes.concat(stationsAdjacentes)
     }
+}
+function travel(noeud) {
+    let clone = noeud
+    console.log(clone.distanceParcouru)
+    if (!clone.stationsAdjacentes.length)
+        return
+    travel(clone.stationsAdjacentes[Math.floor(Math.random() * clone.stationsAdjacentes.length)])
+}
+function getMin(noeud, min, depth) {
+    let cloneNoeud = noeud
+    let cloneMin = min ? min : new Noeud(0, [])
+    if (!cloneNoeud.stationsAdjacentes.length || !depth)
+        return cloneMin.distanceParcouru < cloneNoeud.distanceParcouru ? cloneMin : cloneNoeud
 
-
-    travel(noeud) {
-        let clone = noeud ? noeud : this
-        console.log(clone.distanceParcouru)
-        if (!clone.stationsAdjacentes.length)
-            return
-        this.travel(clone.stationsAdjacentes[Math.floor(Math.random() * clone.stationsAdjacentes.length)])
+    let newMin = cloneNoeud
+    for (let i = 0; i < cloneNoeud.stationsAdjacentes.length; i++) {
+        let minFromTree = getMin(cloneNoeud.stationsAdjacentes[i], cloneNoeud.distanceParcouru < cloneNoeud.stationsAdjacentes[i].distanceParcouru ? cloneNoeud : cloneNoeud.stationsAdjacentes[i], depth - 1)// Math.min(this.distanceParcouru,dist)
+        newMin = newMin.distanceParcouru < minFromTree.distanceParcouru ? newMin : minFromTree
     }
-    getMin(noeud, min,depth) {
-        let cloneNoeud = noeud ? noeud : this
-        let cloneMin = min ? min : this.distanceParcouru
-        if (!cloneNoeud.stationsAdjacentes.length || !depth)
-            return Math.min(cloneMin, cloneNoeud.distanceParcouru)
-        let newMin = this.distanceParcouru
-        for (let i = 0; i < cloneNoeud.stationsAdjacentes.length; i++) {
-            let minFromTree = this.getMin(cloneNoeud.stationsAdjacentes[i], Math.min(cloneNoeud.distanceParcouru, this.distanceParcouru),depth-1)// Math.min(this.distanceParcouru,dist)
-            newMin = minFromTree == undefined ? this.distanceParcouru : Math.min(newMin, minFromTree)
-        }
-        return newMin
-
-    }
-    
-
+    return newMin
 }
 
 function shortestPath(departure, destination) {
 
-    let stationsAdjacentes = departure.stationsAdjacentes
-    console.log(departure.getMin(null,null,1))
-    
+    let min = getMin(departure, null, 1);
+    console.log(min)
+    let newStationsAdjacentes = getStationsAdjacentesExceptMin(min, departure.stationsAdjacentes)
+    console.log(newStationsAdjacentes)
+}
+
+function getStationsAdjacentesExceptMin(min, stations) {
+
+    return stations.filter(s => s.distanceParcouru != min.distanceParcouru);
 }
 
 
-
 let root = new Noeud(788, [])
-let n1 = new Noeud(478, [])
+let n1 = new Noeud(728, [])
 let n2 = new Noeud(578, [])
 let n3 = new Noeud(698, [])
 
@@ -68,41 +69,9 @@ n3.addStationAdjacente(new Noeud(894, [new Noeud(447, []), new Noeud(999, []), n
 n3.addStationAdjacente(new Noeud(785, [new Noeud(288, []), new Noeud(282, []), new Noeud(247, [])]))
 n3.addStationAdjacente(new Noeud(547, [new Noeud(457, []), new Noeud(563, [new Noeud(389, []), new Noeud(931, [])]), new Noeud(546, [])]))
 
-root.addStationAdjacente([n1, n2,n3])
+root.addStationAdjacente([n1, n2, n3])
 
-//console.log(root.getMin(null,null,2))
-//root.travel()
+//console.log(getMin(root, null, 200))
+//travel(root)
 
-shortestPath(root,null)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*travel() {
-        console.log(this.distanceParcouru)
-        if (!this.stationsAdjacentes.length)
-            return
-        this.stationsAdjacentes[Math.floor(Math.random() * this.stationsAdjacentes.length)].travel()
-    }
-    getMin(dist) {
-        if (!this.stationsAdjacentes.length)
-            return Math.min(dist,this.distanceParcouru)
-        for (let i = 0; i < this.stationsAdjacentes.length; i++) {
-            console.log(this.stationsAdjacentes[i].getMin(this.distanceParcouru)) // Math.min(this.distanceParcouru,dist)
-
-        }
-    }
-*/
+shortestPath(root, null)
