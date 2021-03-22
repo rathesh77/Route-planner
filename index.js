@@ -61,9 +61,7 @@ function shortestPath(departure, destination, indexes, distanceTraveled) {
 
     if (!min)
         return "cette station n'existe pas"
-    if (min.from.stationName == departure.stationName)
-        SumDistances += departure.distanceTraveled
-    else
+   
         SumDistances = min.distanceTraveled
     console.table(departure.adjacentStations)
     /* if ( departure.stationName == 'F')
@@ -143,7 +141,7 @@ let n1 = new Station(85, [], "B")
 let n2 = new Station(217, [], "C")
 let n3 = new Station(173, [], "E")
 
-n1.addAdjacentStation(new Station(80, [new Station(250, [new Station(84, [], "J")], "I")], "F"))
+n1.addAdjacentStation(new Station(80, [new Station(0, [new Station(84, [], "J")], "I")], "F"))
 n2.addAdjacentStation(new Station(186, [], "G"))
 n2.addAdjacentStation(new Station(103, [new Station(183, [], "D"), new Station(167, [], "J")], "H"))
 n3.addAdjacentStation(new Station(502, [], "J"))
