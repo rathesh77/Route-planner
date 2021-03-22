@@ -40,39 +40,78 @@ function getMin(station, min, depth) {
     return currentStation
 }
 
-function shortestPath(departure, destination, indexes) {
+function shortestPath(departure, destination, indexes, distanceTraveled) {
 
+    let SumDistances = distanceTraveled
     if (departure.stationName == destination) {
         let reverseStation = departure, path = [departure.stationName]
         while ((reverseStation = reverseStation.from) != null) {
             path.push(reverseStation.stationName)
         }
-        return path
+        return { distanceTraveled, path }
     }
 
     departure.adjacentStations = everyStationComeFrom(departure)
-    departure.adjacentStations = departure.adjacentStations.concat(indexes)
-    let min = getShorterDistance(departure.adjacentStations)
+    departure.adjacentStations = concat(departure.adjacentStations, indexes)
+    //departure.adjacentStations = departure.adjacentStations.concat(indexes)
+    //console.table( departure.adjacentStations)
+
+    const { min, newAdjacentStations } = getShorterDistance(departure.adjacentStations)
+    //console.log(min)
+
     if (!min)
         return "cette station n'existe pas"
-    min.distanceTraveled += min.from.distanceTraveled
+    if (min.from.stationName == departure.stationName)
+        SumDistances += departure.distanceTraveled
+    else
+        SumDistances = min.distanceTraveled
+    console.table(departure.adjacentStations)
+    /* if ( departure.stationName == 'F')
+         return*/
+    //let newAdjacentStations = getAdjacentStationsExceptMin(min, departure.adjacentStations)
+    return shortestPath(Object.create(min), destination, newAdjacentStations, SumDistances)
+}
+function concat(adjacentStations, indexes) {
+    let arr = [...adjacentStations]
+    for (let i = 0; i < indexes.length; i++) {
+        let found = false
+        for (let j = 0; j < arr.length; j++) {
+            if ( arr[j].stationName == indexes[i].stationName) {
+                found = true
+                if ( arr[j].distanceTraveled > indexes[i].distanceTraveled )
+                {
+                    arr[j] = indexes[i]
+                }
+            }
+        }
+        if ( !found)
+        arr.push(indexes[i])
 
-    let newAdjacentStations = getAdjacentStationsExceptMin(min, departure.adjacentStations)
-    return shortestPath(Object.create(min), destination, newAdjacentStations)
+    }
+    //console.table(arr)
+    return arr
 }
 function getShorterDistance(arr) {
     let min = arr[0]
+    let newAdjacentStations = []
     for (let i = 1; i < arr.length; i++) {
         if (arr[i].distanceTraveled < min.distanceTraveled) {
+            newAdjacentStations.push(min)
             min = arr[i]
+
+        }
+        else {
+            newAdjacentStations.push(arr[i])
         }
     }
-    return min
+    return { min, newAdjacentStations }
 }
 function everyStationComeFrom(from) {
     let clone = from
     for (let i = 0; i < clone.adjacentStations.length; i++) {
         clone.adjacentStations[i].from = from
+        clone.adjacentStations[i].distanceTraveled += clone.adjacentStations[i].from.distanceTraveled
+
     }
     return clone.adjacentStations
 }
@@ -97,12 +136,12 @@ n2.addAdjacentStation(new Station(237, [new Station(298, [], "z"), new Station(6
 n3.addAdjacentStation(new Station(894, [new Station(447, [], "af"), new Station(999, [], "ag"), new Station(589, [], "ah")], "ae"))
 n3.addAdjacentStation(new Station(785, [new Station(288, [], "aj"), new Station(282, [], "ak"), new Station(247, [], "al")], "ai"))
 n3.addAdjacentStation(new Station(547, [new Station(457, [], "an"), new Station(563, [new Station(389, [], "ao"), new Station(931, [], "ap")],"az"), new Station(546, [], "aq")], "am"))
-
 */
+
 let root = new Station(0, [], "A")
 let n1 = new Station(85, [], "B")
 let n2 = new Station(217, [], "C")
-let n3 = new Station(0, [], "E")
+let n3 = new Station(173, [], "E")
 
 n1.addAdjacentStation(new Station(80, [new Station(250, [new Station(84, [], "J")], "I")], "F"))
 n2.addAdjacentStation(new Station(186, [], "G"))
@@ -111,8 +150,11 @@ n3.addAdjacentStation(new Station(502, [], "J"))
 
 
 root.addAdjacentStation([n1, n2, n3])
-//console.log(root)
-console.log(shortestPath(root, "J", []))
-//console.log("-----------------\n",root)
+console.log(shortestPath(Object.create(root), "J", [], 0))
 
-console.log(shortestPath(root, "J", []))
+//console.log(root)
+
+
+
+
+//concat([new Station(11, [], 'a'), new Station(10, [], 'b'), new Station(10, [], 'c')], [new Station(10, [], 'd'), new Station(2, [], 'b'), new Station(10, [], 'a')]) // a 10,b 10,c 10,d 10,e 10
