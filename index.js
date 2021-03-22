@@ -61,8 +61,8 @@ function shortestPath(departure, destination, indexes, distanceTraveled) {
 
     if (!min)
         return "cette station n'existe pas"
-   
-        SumDistances = min.distanceTraveled
+
+    SumDistances = min.distanceTraveled
     console.table(departure.adjacentStations)
     /* if ( departure.stationName == 'F')
          return*/
@@ -74,16 +74,15 @@ function concat(adjacentStations, indexes) {
     for (let i = 0; i < indexes.length; i++) {
         let found = false
         for (let j = 0; j < arr.length; j++) {
-            if ( arr[j].stationName == indexes[i].stationName) {
+            if (arr[j].stationName == indexes[i].stationName) {
                 found = true
-                if ( arr[j].distanceTraveled > indexes[i].distanceTraveled )
-                {
+                if (arr[j].distanceTraveled > indexes[i].distanceTraveled) {
                     arr[j] = indexes[i]
                 }
             }
         }
-        if ( !found)
-        arr.push(indexes[i])
+        if (!found)
+            arr.push(indexes[i])
 
     }
     //console.table(arr)
@@ -141,7 +140,7 @@ let n1 = new Station(85, [], "B")
 let n2 = new Station(217, [], "C")
 let n3 = new Station(173, [], "E")
 
-n1.addAdjacentStation(new Station(80, [new Station(0, [new Station(84, [], "J")], "I")], "F"))
+n1.addAdjacentStation(new Station(80, [new Station(250, [new Station(84, [], "J")], "I")], "F"))
 n2.addAdjacentStation(new Station(186, [], "G"))
 n2.addAdjacentStation(new Station(103, [new Station(183, [], "D"), new Station(167, [], "J")], "H"))
 n3.addAdjacentStation(new Station(502, [], "J"))
