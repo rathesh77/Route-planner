@@ -11,56 +11,69 @@ class Dijkstra {
      * @returns 
      */
     static shortestPath(departure, destination, indexes, distanceTraveled, g, previous) {
-        console.log("depart",departure)
+        console.log("depart", departure)
         let currentStation = g.getNoeuds().get(departure)
         let SumDistances = distanceTraveled
 
         if (departure == destination) {
-            
-            return 'fini '+distanceTraveled
+            return 'fini ' + distanceTraveled
         }
         let adjacentStations = [...currentStation.getAdj()]
         for (let i = 0; i < adjacentStations.length; i++) {
             if (adjacentStations[i].getValeur() == previous) {
-                //console.log("wesh",adjacentStations[i].getValeur())
                 adjacentStations.splice(i, 1)
             }
         }
+        adjacentStations = this.incrementWeights(adjacentStations, distanceTraveled, currentStation)
         //console.log(adjacentStations)
-        adjacentStations = this.incrementWeights(adjacentStations,distanceTraveled,departure)
-   
-        adjacentStations = this.concat(currentStation,adjacentStations,indexes)
+        adjacentStations = this.concat(currentStation, adjacentStations, indexes)
+
         const { min, newAdjacentStations } = this.getShortestDistance(currentStation, adjacentStations)
+
 
         if (!min)
             return "cette station n'existe pas"
-       
-        SumDistances = min.getTete().get(departure).poids
-        console.log(min.getTete().get(departure).poids,SumDistances)
-        //if ( departure ==1)
-        //return
-       
-        this.shortestPath(min.getValeur(),destination,newAdjacentStations,SumDistances,g, departure)
-    }
-    static incrementWeights(adjacentStations, distanceTraveled,currentStation) {
-        let stations = []
-        for ( let i = 0 ; i < adjacentStations.length;i++) {
-            let temp = Object.create(adjacentStations[i])
 
-            temp.getTete().get(currentStation).poids += distanceTraveled
+/*        if (min.getTete().get(departure))
+            SumDistances = min.getTete().get(departure).poids
+        else*/
+            SumDistances = min.getTete().get(min.from.valeur).poids
+        //console.log(min.valeur)
+
+        if (departure === '2')
+            return
+        return this.shortestPath(min.getValeur(), destination, newAdjacentStations, SumDistances, g, departure)
+    }
+    static incrementWeights(adjacentStations, distanceTraveled, currentStation) {
+        let stations = []
+        for (let i = 0; i < adjacentStations.length; i++) {
+            let temp = (adjacentStations[i])
+
+            temp.getTete().get(currentStation.valeur).poids += distanceTraveled
+            //console.log(temp.from)
+            if ( temp.from)
+            {
+                if (  temp.getTete().get(currentStation.valeur).poids < temp.getTete().get(temp.from.valeur).poids)
+                temp.from = currentStation
+            }
+            else
+            temp.from = currentStation
+
             stations.push(temp)
         }
         return stations
     }
     static concat(currentStation, adjacentStations, indexes) {
         let arr = [...adjacentStations]
-    
+        /*        if ( indexes[0])
+                console.log(indexes[0].getTete())*/
         for (let i = 0; i < indexes.length; i++) {
             let found = false
             for (let j = 0; j < arr.length; j++) {
                 if (arr[j].getValeur() == indexes[i].getValeur()) {
                     found = true
-                    if (arr[j].getTete().get(currentStation.valeur).poids > indexes[i].getTete().get(currentStation.valeur).poids) {
+                    let nextStep = arr[j].getTete().get(currentStation.valeur)
+                    if (nextStep.poids > indexes[i].getTete().get(currentStation.valeur).poids) {
                         arr[j] = indexes[i]
                     }
                     break
@@ -70,27 +83,40 @@ class Dijkstra {
                 arr.push(indexes[i])
 
         }
+        //console.log('arr',arr)
         return arr
     }
 
     static getShortestDistance(currentStation, adjacentStations) {
+        //console.log('paaaah',adjacentStations)
         let min = adjacentStations[0]
         let newAdjacentStations = []
-        
+        if (adjacentStations[0].valeur == 7) {
+          //  console.log(adjacentStations[0].from)
+        }
         for (let i = 1; i < adjacentStations.length; i++) {
-            //console.log(adjacentStations[i].getValeur())
-            console.table(adjacentStations[i].getValeur())
+            /*let currentPath = adjacentStations[i].getTete().get(currentStation.valeur)
+            let previousPath = adjacentStations[i].getTete().get(adjacentStations[i].from.valeur) 
+            if( currentPath && previousPath)
+            {
 
-            if ( adjacentStations[i].getTete().get(currentStation.valeur).poids < min.getTete().get(currentStation.valeur).poids) {
+            } */
+            //console.log(adjacentStations[i])
+            const nextStep =  adjacentStations[i].getTete().get(adjacentStations[i].from.valeur)
+
+            const minStep =  min.getTete().get(min.from.valeur)
+            //console.log(min.from)
+            console.log(nextStep.poids,minStep.poids)
+
+            if (nextStep.poids < minStep.poids) {
                 newAdjacentStations.push(min)
                 min = adjacentStations[i]
             }
-            else
-            {
+            else {
                 newAdjacentStations.push(adjacentStations[i])
             }
         }
-        return {min,newAdjacentStations}
+        return { min, newAdjacentStations }
     }
 
 
