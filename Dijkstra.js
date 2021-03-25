@@ -101,5 +101,8 @@ class Dijkstra {
 console.log(Dijkstra.shortestPath('0', '4', codeForGeeksExample))
 console.log(Dijkstra.shortestPath('4', '0', codeForGeeksExample))
 console.log(Dijkstra.shortestPath('8', '4', codeForGeeksExample))
+console.log(Dijkstra.shortestPath('E', 'I', wikipediaExample))
+console.log(Dijkstra.shortestPath('A', 'J', wikipediaExample))
+console.log(Dijkstra.shortestPath('D', 'F', wikipediaExample))
 
 //console.log(codeForGeeksExample)
