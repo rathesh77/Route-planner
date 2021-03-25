@@ -1,6 +1,8 @@
 const graphExamples = require('./graph-examples.js')
 let wikipediaExample = graphExamples[0]
 let codeForGeeksExample = graphExamples[1]
+let otherExample = graphExamples[2]
+
 class Dijkstra {
     /**
      * 
@@ -12,15 +14,17 @@ class Dijkstra {
      * @param {Object} previous
      * @returns 
      */
-    static shortestPath(departure, destination, g, indexes, distanceTraveled, previous, initial, fullPath) {
+    static shortestPath(departure, destination, g, indexes, min, initial, fullPath) {
         if (!initial)
             initial = departure
         if (!fullPath)
             fullPath = new Map()
         if (!indexes)
             indexes = []
-        if (!distanceTraveled)
-            distanceTraveled = 0
+        if (!min) {
+            min = { distanceTraveled: 0, previous: departure }
+        }
+        //console.log(min)
         //console.log('departure', departure);
         const currentNode = g.getNoeuds().get(departure)
         const endNode = g.getNoeuds().get(destination)
@@ -38,29 +42,30 @@ class Dijkstra {
                 previous = fullPath.get(previous)
                 path.unshift(previous)
             }
-            return { distanceTraveled, path }
+            return { distanceTraveled: min.distanceTraveled, path }
         }
         const adjacentNodes = currentNode.getAdj()
-        const paths = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, distanceTraveled, previous)
-        const { min, newIndexes } = this.getMin(paths)
-        if (!min)
+        const paths = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min)
+        const { newMin, newIndexes } = this.getMin(paths)
+        if (!newMin)
             return 'node not found'
 
-        if (!fullPath.has(min.nextNode.valeur))
-            fullPath.set(min.nextNode.valeur, min.previous.valeur)
+        if (!fullPath.has(newMin.nextNode.valeur))
+            fullPath.set(newMin.nextNode.valeur, newMin.previous.valeur)
 
 
-        return this.shortestPath(min.nextNode.valeur, destination, g, newIndexes, min.distanceTraveled, min.previous.valeur, initial, fullPath)
+        return this.shortestPath(newMin.nextNode.valeur, destination, g, newIndexes, newMin, initial, fullPath)
     }
-    static getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, distanceTraveled, previous) {
+    static getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min) {
+        //console.log(min)
         let paths = []
         let seen = {}
         let pathSize = 0
         for (let i = 0; i < adjacentNodes.length; i++) {
-            if (adjacentNodes[i].valeur == previous)
+            if (adjacentNodes[i].valeur == min.previous)
                 continue
 
-            const newDistanceTraveled = distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
+            const newDistanceTraveled = min.distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
             paths.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
             seen[adjacentNodes[i].valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
             pathSize++
@@ -94,15 +99,13 @@ class Dijkstra {
 
             }
         }
-        return { min, newIndexes }
+        return { newMin: min, newIndexes }
     }
 }
 
 console.log(Dijkstra.shortestPath('0', '4', codeForGeeksExample))
-console.log(Dijkstra.shortestPath('4', '0', codeForGeeksExample))
-console.log(Dijkstra.shortestPath('8', '4', codeForGeeksExample))
-console.log(Dijkstra.shortestPath('E', 'I', wikipediaExample))
 console.log(Dijkstra.shortestPath('A', 'J', wikipediaExample))
-console.log(Dijkstra.shortestPath('D', 'F', wikipediaExample))
+console.log(Dijkstra.shortestPath('E', 'F', wikipediaExample))
+console.log(Dijkstra.shortestPath('A', 'F', otherExample))
 
 //console.log(codeForGeeksExample)
