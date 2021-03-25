@@ -1,7 +1,6 @@
 
 const Graph = require('./Graph')
-
-module.exports.wikipediaExample = function () {
+function wikipediaExample () {
 
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
@@ -24,7 +23,7 @@ module.exports.wikipediaExample = function () {
     return g
 }
 
-module.exports.codeForGeeksExample = function () {
+function codeForGeeksExample () {
 
     let g = new Graph()
     const nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -49,3 +48,5 @@ module.exports.codeForGeeksExample = function () {
     return g
 
 }
+
+module.exports = [wikipediaExample(),codeForGeeksExample()]
