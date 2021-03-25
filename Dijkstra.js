@@ -1,3 +1,4 @@
+const Graph = require('./Graph.js')
 const graphExamples = require('./graph-examples.js')
 let wikipediaExample = graphExamples[0]
 let codeForGeeksExample = graphExamples[1]
@@ -8,11 +9,12 @@ class Dijkstra {
      * 
      * @param {String} departure 
      * @param {String} destination 
-     * @param {Array<Object>} indexes 
-     * @param {Number} distanceTraveled 
      * @param {Graph} g 
-     * @param {Object} previous
-     * @returns 
+     * @param {Array} indexes 
+     * @param {Object} min
+     * @param {String} initial
+     * @param {Map} fullPath
+     * @returns {Object} {distanceTraveled: String, path: Array[String]}
      */
     static shortestPath(departure, destination, g, indexes, min, initial, fullPath) {
         if (!initial)
@@ -62,7 +64,7 @@ class Dijkstra {
         let seen = {}
         let pathSize = 0
         for (let i = 0; i < adjacentNodes.length; i++) {
-            if (adjacentNodes[i].valeur == min.previous)
+            if (adjacentNodes[i].valeur == min.previous.valeur)
                 continue
 
             const newDistanceTraveled = min.distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
@@ -104,8 +106,10 @@ class Dijkstra {
 }
 
 console.log(Dijkstra.shortestPath('0', '4', codeForGeeksExample))
+console.log(Dijkstra.shortestPath('0', '5', codeForGeeksExample))
 console.log(Dijkstra.shortestPath('A', 'J', wikipediaExample))
+console.log(Dijkstra.shortestPath('E', 'I', wikipediaExample))
 console.log(Dijkstra.shortestPath('E', 'F', wikipediaExample))
-console.log(Dijkstra.shortestPath('A', 'F', otherExample))
+console.log(Dijkstra.shortestPath('A', 'D', otherExample))
 
 //console.log(codeForGeeksExample)
