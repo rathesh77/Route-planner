@@ -32,16 +32,6 @@ class Dijkstra {
         }
         if (departure == destination) {
             let path = [destination]
-            //console.log(fullPath)
-            /*let previousNode = g.getNoeuds().get(endNode.previous)
-            path.unshift(previousNode.valeur)
-
-            while (path[0] != initial) {
-                previousNode = previousNode.previous
-                previousNode = g.getNoeuds().get(previousNode)
-                path.unshift(previousNode.valeur)
-
-            }*/
             let previous = fullPath.get(destination)
             path.unshift(previous)
             while (previous != initial) {
@@ -51,9 +41,8 @@ class Dijkstra {
             return { distanceTraveled, path }
         }
         const adjacentNodes = currentNode.getAdj()
-
         const paths = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, distanceTraveled, previous)
-        let { min, newIndexes } = this.getMin(paths)
+        const { min, newIndexes } = this.getMin(paths)
         if (!min)
             return 'node not found'
 
