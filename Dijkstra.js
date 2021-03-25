@@ -8,10 +8,11 @@ class Dijkstra {
      * 
      * @param {String} departure 
      * @param {String} destination 
-     * @param {Array<Object>} indexes 
-     * @param {Number} distanceTraveled 
-     * @param {Graph} g 
-     * @param {Object} previous
+     * @param {Graph} g
+     * @param {Array} indexes 
+     * @param {Object} min 
+     * @param {String} initial 
+     * @param {Map} fullPath
      * @returns 
      */
     static shortestPath(departure, destination, g, indexes, min, initial, fullPath) {
@@ -24,7 +25,6 @@ class Dijkstra {
         if (!min) {
             min = { distanceTraveled: 0, previous: departure }
         }
-        //console.log(min)
         //console.log('departure', departure);
         const currentNode = g.getNoeuds().get(departure)
         const endNode = g.getNoeuds().get(destination)
@@ -45,8 +45,7 @@ class Dijkstra {
             return { distanceTraveled: min.distanceTraveled, path }
         }
         const adjacentNodes = currentNode.getAdj()
-        const { newMin, newIndexes } = this.getMinAndNewIndexes(adjacentNodes, indexes, currentNode, min)
-        //const { newMin, newIndexes } = this.getMin(paths)
+        const { newMin, newIndexes } = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min)
         if (!newMin)
             return 'node not found'
 
@@ -56,73 +55,56 @@ class Dijkstra {
 
         return this.shortestPath(newMin.nextNode.valeur, destination, g, newIndexes, newMin, initial, fullPath)
     }
-    static getMinAndNewIndexes(adjacentNodes, indexes, currentNode, min) {
-        //console.log(min)
+    static getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min) {
         let paths = []
         let seen = {}
         let pathSize = 0
-        let minWeight = { nextNode: adjacentNodes[0], distanceTraveled: min.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
+        let minimum = { nextNode: adjacentNodes[0], distanceTraveled: min.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
 
-        let newIndexes = []
-        for (let i = 1; i < adjacentNodes.length; i++) {
-            if (adjacentNodes[i].valeur == min.previous)
-                continue
-
+        let index = -1
+        for (let i = 0; i < adjacentNodes.length; i++) {
+        
             const newDistanceTraveled = min.distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
             paths.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
             seen[adjacentNodes[i].valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
-            //pathSize++
-            if (newDistanceTraveled < minWeight.distanceTraveled) {
-                newIndexes.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
-                minWeight = { nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode }
-            }
-            else {
-                newIndexes.push(adjacentNodes[i])
-
+            pathSize++
+            if (minimum.distanceTraveled > newDistanceTraveled) {
+                minimum = { nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode }
+                index = paths.length - 1
             }
         }
 
         for (let i = 0; i < indexes.length; i++) {
             if (seen[indexes[i].nextNode.valeur]) {
                 if (indexes[i].distanceTraveled < seen[indexes[i].nextNode.valeur].distanceTraveled) {
-                    minWeight = indexes[i]
-                    //paths[seen[indexes[i].nextNode.valeur].index].distanceTraveled = indexes[i].distanceTraveled
-                    //paths[seen[indexes[i].nextNode.valeur].index].previous = indexes[i].previous
-                    //seen[indexes[i].nextNode.valeur].distanceTraveled = indexes[i].distanceTraveled
+                    paths[seen[indexes[i].nextNode.valeur].index].distanceTraveled = indexes[i].distanceTraveled
+                    paths[seen[indexes[i].nextNode.valeur].index].previous = indexes[i].previous
+                    seen[indexes[i].nextNode.valeur].distanceTraveled = indexes[i].distanceTraveled
+
+                    minimum = indexes[i]
+                    index = seen[indexes[i].nextNode.valeur].index
                 }
             }
             else {
-                if (indexes[i].distanceTraveled < minWeight.distanceTraveled) {
-                    newIndexes.push(minWeight)
-                    minWeight = indexes[i]
+                paths.push(indexes[i])
+                if (indexes[i].distanceTraveled < minimum.distanceTraveled) {
+                    minimum = indexes[i]
+                    index = paths.length - 1
                 }
-                else
-                    paths.push(indexes[i])
             }
         }
-        return { newMin: minWeight, newIndexes: paths }
+        if (index != -1)
+            paths.splice(index, 1)
+        return { newMin: minimum, newIndexes: paths }
     }
-    /*static getMin(adjacentNodes) {
-        let newIndexes = []
-        let min = adjacentNodes[0]
 
-        for (let i = 1; i < adjacentNodes.length; i++) {
-            if (min.distanceTraveled > adjacentNodes[i].distanceTraveled) {
-                newIndexes.push(min)
-                min = adjacentNodes[i]
-            }
-            else {
-                newIndexes.push(adjacentNodes[i])
-
-            }
-        }
-        return { newMin: min, newIndexes }
-    }*/
 }
 
 console.log(Dijkstra.shortestPath('0', '4', codeForGeeksExample))
+console.log(Dijkstra.shortestPath('0', '5', codeForGeeksExample))
 console.log(Dijkstra.shortestPath('A', 'J', wikipediaExample))
+console.log(Dijkstra.shortestPath('E', 'I', wikipediaExample))
 console.log(Dijkstra.shortestPath('E', 'F', wikipediaExample))
-console.log(Dijkstra.shortestPath('A', 'F', otherExample))
+console.log(Dijkstra.shortestPath('A', 'D', otherExample))
 
 //console.log(codeForGeeksExample)
