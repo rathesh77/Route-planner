@@ -45,8 +45,8 @@ class Dijkstra {
             return { distanceTraveled: min.distanceTraveled, path }
         }
         const adjacentNodes = currentNode.getAdj()
-        const paths = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min)
-        const { newMin, newIndexes } = this.getMin(paths)
+        const { newMin, newIndexes } = this.getMinAndNewIndexes(adjacentNodes, indexes, currentNode, min)
+        //const { newMin, newIndexes } = this.getMin(paths)
         if (!newMin)
             return 'node not found'
 
@@ -56,36 +56,53 @@ class Dijkstra {
 
         return this.shortestPath(newMin.nextNode.valeur, destination, g, newIndexes, newMin, initial, fullPath)
     }
-    static getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min) {
+    static getMinAndNewIndexes(adjacentNodes, indexes, currentNode, min) {
         //console.log(min)
         let paths = []
         let seen = {}
         let pathSize = 0
-        for (let i = 0; i < adjacentNodes.length; i++) {
+        let minWeight = { nextNode: adjacentNodes[0], distanceTraveled: min.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
+
+        let newIndexes = []
+        for (let i = 1; i < adjacentNodes.length; i++) {
             if (adjacentNodes[i].valeur == min.previous)
                 continue
 
             const newDistanceTraveled = min.distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
             paths.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
             seen[adjacentNodes[i].valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
-            pathSize++
+            //pathSize++
+            if (newDistanceTraveled < minWeight.distanceTraveled) {
+                newIndexes.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
+                minWeight = { nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode }
+            }
+            else {
+                newIndexes.push(adjacentNodes[i])
+
+            }
         }
 
         for (let i = 0; i < indexes.length; i++) {
             if (seen[indexes[i].nextNode.valeur]) {
                 if (indexes[i].distanceTraveled < seen[indexes[i].nextNode.valeur].distanceTraveled) {
-                    paths[seen[indexes[i].nextNode.valeur].index].distanceTraveled = indexes[i].distanceTraveled
-                    paths[seen[indexes[i].nextNode.valeur].index].previous = indexes[i].previous
-                    seen[indexes[i].nextNode.valeur].distanceTraveled = indexes[i].distanceTraveled
+                    minWeight = indexes[i]
+                    //paths[seen[indexes[i].nextNode.valeur].index].distanceTraveled = indexes[i].distanceTraveled
+                    //paths[seen[indexes[i].nextNode.valeur].index].previous = indexes[i].previous
+                    //seen[indexes[i].nextNode.valeur].distanceTraveled = indexes[i].distanceTraveled
                 }
             }
             else {
-                paths.push(indexes[i])
+                if (indexes[i].distanceTraveled < minWeight.distanceTraveled) {
+                    newIndexes.push(minWeight)
+                    minWeight = indexes[i]
+                }
+                else
+                    paths.push(indexes[i])
             }
         }
-        return paths
+        return { newMin: minWeight, newIndexes: paths }
     }
-    static getMin(adjacentNodes) {
+    /*static getMin(adjacentNodes) {
         let newIndexes = []
         let min = adjacentNodes[0]
 
@@ -100,7 +117,7 @@ class Dijkstra {
             }
         }
         return { newMin: min, newIndexes }
-    }
+    }*/
 }
 
 console.log(Dijkstra.shortestPath('0', '4', codeForGeeksExample))
