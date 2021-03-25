@@ -5,7 +5,7 @@ function wikipediaExample () {
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
     for (let i = 0; i < nodes.length; i++)
-        g.addNoeud(nodes[i].toString())
+        g.addNoeud(nodes[i])
 
 
     g.addPath('A', 'B', 85)
@@ -49,4 +49,29 @@ function codeForGeeksExample () {
 
 }
 
-module.exports = [wikipediaExample(),codeForGeeksExample()]
+function otherExample () {
+
+    let g = new Graph()
+    const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    for (let i = 0; i < nodes.length; i++)
+        g.addNoeud(nodes[i])
+
+    g.addPath('A', 'B', 3)
+    g.addPath('A', 'D', 9)
+    g.addPath('A', 'C', 5)
+    g.addPath('B', 'C', 3)
+    g.addPath('B', 'D', 4)
+    g.addPath('B', 'E', 7)
+    g.addPath('C', 'E', 6)
+    g.addPath('C', 'D', 2)
+    g.addPath('C', 'F', 8)
+    g.addPath('E', 'D', 2)
+    g.addPath('E', 'F', 5)
+    g.addPath('D', 'F', 2)
+    
+
+    return g
+
+}
+
+module.exports = [wikipediaExample(),codeForGeeksExample(), otherExample()]
