@@ -1,28 +1,30 @@
+const Noeud = require("./Noeud")
+
 module.exports = class Dijkstra {
     /**
      * 
      * @param {String} departure 
      * @param {String} destination 
-     * @param {Graph} g
-     * @param {Array} indexes 
-     * @param {Object} min 
-     * @param {String} initial 
+     * @param {Graph} graph
+     * @param {Array} oldPossiblePaths 
+     * @param {Object} pathTaken 
+     * @param {String} initialNode 
      * @param {Map} fullPath
-     * @returns 
+     * @returns {Object} { distanceTraveled, path }
      */
-    static shortestPath(departure, destination, g, indexes, min, initial, fullPath) {
-        if (!initial)
-            initial = departure
+    static shortestPath(departure, destination, graph, oldPossiblePaths, pathTaken, initialNode, fullPath) {
+        if (!initialNode)
+            initialNode = departure
         if (!fullPath)
             fullPath = new Map()
-        if (!indexes)
-            indexes = []
-        if (!min) {
-            min = { distanceTraveled: 0, previous: departure }
+        if (!oldPossiblePaths)
+            oldPossiblePaths = []
+        if (!pathTaken) {
+            pathTaken = { distanceTraveled: 0, previous: departure }
         }
         //console.log('departure', departure);
-        const currentNode = g.getNoeuds().get(departure)
-        const endNode = g.getNoeuds().get(destination)
+        const currentNode = graph.getNoeuds().get(departure)
+        const endNode = graph.getNoeuds().get(destination)
         if (!currentNode) {
             return 'starting node not found'
         }
@@ -33,66 +35,79 @@ module.exports = class Dijkstra {
             let path = [destination]
             let previous = fullPath.get(destination)
             path.unshift(previous)
-            while (previous != initial) {
+            while (previous != initialNode) {
                 previous = fullPath.get(previous)
                 path.unshift(previous)
             }
-            return { distanceTraveled: min.distanceTraveled, path }
+            return { distanceTraveled: pathTaken.distanceTraveled, path }
         }
         const adjacentNodes = currentNode.getAdj()
-        const { newMin, newIndexes } = this.getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min)
-        if (!newMin)
+        const { nextMinimumPath, newPossiblePaths } = this.getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken)
+        if (!nextMinimumPath)
             return 'node not found'
-   
-        if (!fullPath.has(newMin.nextNode.valeur))
-            fullPath.set(newMin.nextNode.valeur, newMin.previous.valeur)
 
+        if (!fullPath.has(nextMinimumPath.nextNode.valeur))
+            fullPath.set(nextMinimumPath.nextNode.valeur, nextMinimumPath.previous.valeur)
 
-        return this.shortestPath(newMin.nextNode.valeur, destination, g, newIndexes, newMin, initial, fullPath)
+        return this.shortestPath(nextMinimumPath.nextNode.valeur, destination, graph, newPossiblePaths, nextMinimumPath, initialNode, fullPath)
     }
-    static getNextPathsWithTraveledDistance(adjacentNodes, indexes, currentNode, min) {
+    /**
+     * @param {Array} adjacentNodes
+     * @param {Array} oldPossiblePaths
+     * @param {Noeud} currentNode
+     * @param {Object} pathTaken
+     * @returns {Object} {nextMinimumPath, newPossiblePaths}
+     */
+    static getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken) {
 
         let paths = []
         let seen = {}
         let pathSize = 0
-        let minimum = { nextNode: adjacentNodes[0], distanceTraveled: min.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
+        let nextMinimumPath = { nextNode: adjacentNodes[0], distanceTraveled: pathTaken.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
 
         let index = 0
         for (let i = 0; i < adjacentNodes.length; i++) {
-            if (adjacentNodes[i].valeur == min.previous.valeur) {
+            const currentAdjNode = adjacentNodes[i]
+
+            if (currentAdjNode.valeur == pathTaken.previous.valeur) {
                 continue
             }
-            const newDistanceTraveled = min.distanceTraveled + adjacentNodes[i].getTete().get(currentNode.valeur).poids
-            paths.push({ nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode })
-            seen[adjacentNodes[i].valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
-            pathSize++
-            if (minimum.distanceTraveled > newDistanceTraveled) {
-                minimum = { nextNode: adjacentNodes[i], distanceTraveled: newDistanceTraveled, previous: currentNode }
+            const nextDistance = currentAdjNode.getTete().get(currentNode.valeur).poids
+            const newDistanceTraveled = pathTaken.distanceTraveled + nextDistance
+
+            paths.push({ nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode })
+            seen[currentAdjNode.valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
+
+            if (nextMinimumPath.distanceTraveled > newDistanceTraveled) {
+                nextMinimumPath = { nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode }
                 index = paths.length - 1
             }
+            pathSize++
         }
 
-        for (let i = 0; i < indexes.length; i++) {
-            if (seen[indexes[i].nextNode.valeur]) {
-                if (indexes[i].distanceTraveled < seen[indexes[i].nextNode.valeur].distanceTraveled) {
-                    paths[seen[indexes[i].nextNode.valeur].index].distanceTraveled = indexes[i].distanceTraveled
-                    paths[seen[indexes[i].nextNode.valeur].index].previous = indexes[i].previous
-                    seen[indexes[i].nextNode.valeur].distanceTraveled = indexes[i].distanceTraveled
+        for (let i = 0; i < oldPossiblePaths.length; i++) {
+            const alternativePath = seen[oldPossiblePaths[i].nextNode.valeur]
+            if (alternativePath) {
+                if (oldPossiblePaths[i].distanceTraveled < alternativePath.distanceTraveled) {
 
-                    minimum = paths[seen[indexes[i].nextNode.valeur].index]
-                    index = seen[indexes[i].nextNode.valeur].index
+                    paths[alternativePath.index].distanceTraveled = oldPossiblePaths[i].distanceTraveled
+                    paths[alternativePath.index].previous = oldPossiblePaths[i].previous
+                    alternativePath.distanceTraveled = oldPossiblePaths[i].distanceTraveled
+
+                    nextMinimumPath = paths[alternativePath.index]
+                    index = alternativePath.index
                 }
             }
             else {
-                paths.push(indexes[i])
-                if (indexes[i].distanceTraveled < minimum.distanceTraveled) {
-                    minimum = indexes[i]
+                paths.push(oldPossiblePaths[i])
+                if (oldPossiblePaths[i].distanceTraveled < nextMinimumPath.distanceTraveled) {
+                    nextMinimumPath = oldPossiblePaths[i]
                     index = paths.length - 1
                 }
             }
         }
         paths.splice(index, 1)
-        return { newMin: minimum, newIndexes: paths }
+        return { nextMinimumPath, newPossiblePaths: paths }
     }
 }
 
