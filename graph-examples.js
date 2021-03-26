@@ -1,6 +1,6 @@
 
 const Graph = require('./Graph')
-function wikipediaExample () {
+let wikipediaExample = function () {
 
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
@@ -23,7 +23,7 @@ function wikipediaExample () {
     return g
 }
 
-function codeForGeeksExample () {
+let codeForGeeksExample = function () {
 
     let g = new Graph()
     const nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -49,7 +49,7 @@ function codeForGeeksExample () {
 
 }
 
-function otherExample () {
+let otherExample = function () {
 
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
@@ -68,10 +68,26 @@ function otherExample () {
     g.addPath('E', 'D', 2)
     g.addPath('E', 'F', 5)
     g.addPath('D', 'F', 2)
-    
+
 
     return g
 
 }
 
-module.exports = [wikipediaExample(),codeForGeeksExample(), otherExample()]
+let transportEnCommun = function () {
+    let g = new Graph()
+    const nodes = ['Auber', 'Châtelet-Les Halles', 'Gare de Lyon', 'Pont Neuf', 'Châtelet', 'Pont Marie', 'Sully-Morland']
+    for (let i = 0; i < nodes.length; i++)
+        g.addNoeud(nodes[i])
+    g.addPath('Auber', 'Châtelet-Les Halles', 3)
+    g.addPath('Châtelet-Les Halles', 'Gare de Lyon', 4)
+    g.addPath('Châtelet-Les Halles', 'Châtelet', 2)
+    g.addPath('Pont Neuf', 'Châtelet', 4)
+    g.addPath('Châtelet', 'Pont Marie', 5)
+    g.addPath('Pont Marie', 'Sully-Morland', 4)
+
+
+    return g
+}
+
+module.exports = { wikipediaExample, codeForGeeksExample, otherExample, transportEnCommun }

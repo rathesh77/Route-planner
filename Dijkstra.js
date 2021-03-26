@@ -1,8 +1,9 @@
 const Graph = require('./Graph.js')
 const graphExamples = require('./graph-examples.js')
-let wikipediaExample = graphExamples[0]
-let codeForGeeksExample = graphExamples[1]
-let otherExample = graphExamples[2]
+let wikipediaExample = graphExamples.wikipediaExample()
+let codeForGeeksExample = graphExamples.codeForGeeksExample()
+let otherExample = graphExamples.otherExample()
+let transportEnCommun = graphExamples.transportEnCommun()
 
 class Dijkstra {
     /**
@@ -111,5 +112,6 @@ console.log(Dijkstra.shortestPath('A', 'J', wikipediaExample))
 console.log(Dijkstra.shortestPath('E', 'I', wikipediaExample))
 console.log(Dijkstra.shortestPath('E', 'F', wikipediaExample))
 console.log(Dijkstra.shortestPath('A', 'D', otherExample))
+console.log(Dijkstra.shortestPath('Auber', 'Sully-Morland', transportEnCommun))
 
 //console.log(codeForGeeksExample)
