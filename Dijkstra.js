@@ -84,16 +84,16 @@ module.exports = class Dijkstra {
             }
             pathSize++
         }
-
         for (let i = 0; i < oldPossiblePaths.length; i++) {
             const alternativePath = seen[oldPossiblePaths[i].nextNode.valeur]
+
             if (alternativePath) {
-                if (oldPossiblePaths[i].distanceTraveled < alternativePath.distanceTraveled) {
+                if (oldPossiblePaths[i].distanceTraveled <= alternativePath.distanceTraveled) {
 
                     paths[alternativePath.index].distanceTraveled = oldPossiblePaths[i].distanceTraveled
                     paths[alternativePath.index].previous = oldPossiblePaths[i].previous
-                    alternativePath.distanceTraveled = oldPossiblePaths[i].distanceTraveled
-
+                }
+                if (nextMinimumPath.distanceTraveled >= paths[alternativePath.index].distanceTraveled) {
                     nextMinimumPath = paths[alternativePath.index]
                     index = alternativePath.index
                 }
@@ -105,6 +105,7 @@ module.exports = class Dijkstra {
                     index = paths.length - 1
                 }
             }
+
         }
         paths.splice(index, 1)
         return { nextMinimumPath, newPossiblePaths: paths }

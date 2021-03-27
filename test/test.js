@@ -17,5 +17,7 @@ test('wikipediaExample', () => {
 })
 
 test('otherExample', () => {
-    expect(Dijkstra.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'C', 'D'] } || { distanceTraveled: 7, path: ['A', 'B', 'D'] })
+    expect(Dijkstra.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'B', 'D'] })
+    expect(Dijkstra.shortestPath('A', 'F', otherExample)).toStrictEqual({ distanceTraveled: 9, path: ['A', 'B', 'D','F'] })
+
 })
