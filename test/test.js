@@ -17,6 +17,15 @@ test('codeForGeeksExample', () => {
     expect(Dijkstra.shortestPath('0', '2', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 12, path: ['0', '1', '2'] })
     expect(Dijkstra.shortestPath('0', '3', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 19, path: ['0', '1', '2', '3'] })
     expect(Dijkstra.shortestPath('0', '6', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 9, path: ['0', '7', '6'] })
+
+    expect(Dijkstra.shortestPath('4', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 21, path: ["4", "5", "6", "7", "0",] })
+    expect(Dijkstra.shortestPath('5', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 11, path: ['5' , '6','7','0'] })
+    expect(Dijkstra.shortestPath('8', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 14, path: ['8', '2','1','0'] })
+    expect(Dijkstra.shortestPath('7', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 8, path: ['7', '0'] })
+    expect(Dijkstra.shortestPath('1', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 4, path: ['1', '0'] })
+    expect(Dijkstra.shortestPath('2', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 12, path: ['2','1','0'] })
+    expect(Dijkstra.shortestPath('3', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 19, path: ['3','2','1','0'] })
+    expect(Dijkstra.shortestPath('6', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 9, path: ['6','7','0'] })
 })
 
 test('wikipediaExample', () => {
