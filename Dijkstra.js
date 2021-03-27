@@ -13,8 +13,13 @@ module.exports = class Dijkstra {
      * @returns {Object} { distanceTraveled, path }
      */
     static shortestPath(departure, destination, graph, oldPossiblePaths, pathTaken, initialNode, fullPath) {
+
         if (!initialNode)
             initialNode = departure
+
+        if (initialNode == destination) {
+            return 'starting node and ending node are the same...'
+        }
         if (!fullPath)
             fullPath = new Map()
         if (!oldPossiblePaths)
@@ -111,7 +116,3 @@ module.exports = class Dijkstra {
         return { nextMinimumPath, newPossiblePaths: paths }
     }
 }
-
-
-
-//console.log(codeForGeeksExample)
