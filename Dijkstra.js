@@ -67,7 +67,6 @@ module.exports = class Dijkstra {
 
         let paths = []
         let seen = {}
-        let pathSize = 0
         let nextMinimumPath = { nextNode: adjacentNodes[0], distanceTraveled: pathTaken.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
 
         let index = 0
@@ -81,13 +80,12 @@ module.exports = class Dijkstra {
             const newDistanceTraveled = pathTaken.distanceTraveled + nextDistance
 
             paths.push({ nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode })
-            seen[currentAdjNode.valeur] = { distanceTraveled: newDistanceTraveled, index: pathSize, previous: currentNode }
+            seen[currentAdjNode.valeur] = { distanceTraveled: newDistanceTraveled, index: paths.length-1, previous: currentNode }
 
             if (nextMinimumPath.distanceTraveled > newDistanceTraveled) {
                 nextMinimumPath = { nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode }
                 index = paths.length - 1
             }
-            pathSize++
         }
         for (let i = 0; i < oldPossiblePaths.length; i++) {
             const alternativePath = seen[oldPossiblePaths[i].nextNode.valeur]

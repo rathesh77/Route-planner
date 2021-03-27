@@ -9,14 +9,21 @@ let transportEnCommun = graphExamples[3]()
 test('codeForGeeksExample', () => {
     expect(Dijkstra.shortestPath('0', '4', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 21, path: ["0", "7", "6", "5", "4"] })
     expect(Dijkstra.shortestPath('0', '5', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 11, path: ['0', '7', '6', '5'] })
+    expect(Dijkstra.shortestPath('0', '8', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 14, path: ['0', '1', '2', '8'] })
+    expect(Dijkstra.shortestPath('0', '7', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 8, path: ['0', '7'] })
+    expect(Dijkstra.shortestPath('0', '1', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 4, path: ['0', '1'] })
     expect(Dijkstra.shortestPath('2', '2', codeForGeeksExample)).toStrictEqual('starting node and ending node are the same...')
     expect(Dijkstra.shortestPath('3', '0', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 19, path: ['3', '2', '1', '0'] })
+    expect(Dijkstra.shortestPath('0', '2', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 12, path: ['0', '1', '2'] })
+    expect(Dijkstra.shortestPath('0', '3', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 19, path: ['0', '1', '2', '3'] })
+    expect(Dijkstra.shortestPath('0', '6', codeForGeeksExample)).toStrictEqual({ distanceTraveled: 9, path: ['0', '7', '6'] })
 })
 
 test('wikipediaExample', () => {
     expect(Dijkstra.shortestPath('E', 'I', wikipediaExample)).toStrictEqual({ distanceTraveled: 586, path: ['E', 'J', 'I'] })
     expect(Dijkstra.shortestPath('E', 'F', wikipediaExample)).toStrictEqual({ distanceTraveled: 338, path: ['E', 'A', 'B', 'F'] })
     expect(Dijkstra.shortestPath('A', 'J', wikipediaExample)).toStrictEqual({ distanceTraveled: 487, path: ['A', 'C', 'H', 'J'] })
+    expect(Dijkstra.shortestPath('J', 'A', wikipediaExample)).toStrictEqual({ distanceTraveled: 487, path: ['J', 'H', 'C', 'A'] })
 })
 
 test('otherExample', () => {
