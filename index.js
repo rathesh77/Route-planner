@@ -5,16 +5,16 @@ const stops = require('./metro-stops.json')
 //console.log(stops)
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    var R = 6371; // Radius of the earth in km
-    var dLat = deg2rad(lat2 - lat1);  // deg2rad below
-    var dLon = deg2rad(lon2 - lon1);
-    var a =
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);  // deg2rad below
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c; // Distance in km
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
     return d;
 }
 
@@ -28,7 +28,7 @@ async function run() {
         const response = await PostgresStore.client.query(`SELECT DISTINCT on(departure,destination) from_stop.stop_name AS departure,
         to_stop.stop_name   AS destination,
         min_transfer_time   AS traveltime,
-        from_stop.stop_lat as from_lat,
+        from_stop.stop_lat as from_et lat,
         from_stop.stop_lon as from_lon,
         to_stop.stop_lat as to_lat,
         to_stop.stop_lon as to_lon
@@ -87,10 +87,10 @@ async function run() {
 
         }
     }
-    //console.log(lines.get('rer-b'))
     graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet-Les Halles rer-b', 4123)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', 4123)
 
-    console.log(Dijkstra.shortestPath('Robinson rer-b', 'Marne-la-Vallée Chessy rer-a', graph))
+    console.log(Dijkstra.shortestPath('Robinson rer-b', 'Pierre et Marie Curie ligne-7', graph))
     //PostgresStore.client.end()
 }
 
