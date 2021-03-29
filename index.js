@@ -47,7 +47,7 @@ async function run() {
         }
     */
     let lines = new Map()
-
+    let stations = {}
     for (let i = 0; i < stops.length; i++) {
         let currentStop = stops[i]
         for (let j = 0; j < stops[i].lines.length; j++) {
@@ -60,7 +60,9 @@ async function run() {
                     lines.get(currentLine.line).get(currentLine.position).push({ ...currentStop })
                 const departure = currentStop.name + ' ' + currentLine.line
                 graph.addNoeud(departure)
-
+                if (currentStop.lines[j - 1]) {
+                    graph.addPath(currentStop.name +' ' +currentStop.lines[j].line,currentStop.name + ' '+currentStop.lines[j - 1].line, 3000)
+                }
                 const nextStation = lines.get(currentLine.line).get(currentLine.position + 1)
                 const previousStation = lines.get(currentLine.line).get(currentLine.position - 1)
                 if (nextStation) {
@@ -87,10 +89,10 @@ async function run() {
 
         }
     }
-    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet-Les Halles rer-b', 4123)
-    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', 4123)
-
-    console.log(Dijkstra.shortestPath('Robinson rer-b', 'Pierre et Marie Curie ligne-7', graph))
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet-Les Halles rer-b', 1)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', 1)
+    console.log()
+    console.log(Dijkstra.shortestPath('Torcy rer-a', 'Mairie de Montreuil ligne-9', graph))
     //PostgresStore.client.end()
 }
 
