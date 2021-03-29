@@ -91,7 +91,6 @@ async function run() {
     }
     graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet-Les Halles rer-b', 1)
     graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', 1)
-    console.log()
     console.log(Dijkstra.shortestPath('Torcy rer-a', 'Mairie de Montreuil ligne-9', graph))
     //PostgresStore.client.end()
 }
