@@ -111,7 +111,7 @@
                 const latlngs = res.path.map((m) => {
                     return [m.lat, m.lon]
                 })
-                const l = L.polyline(latlngs, { color: 'blue', weight: 7, opacity: 0.35 }).addTo(layerGroup);
+                const l = L.polyline(latlngs, { color: 'blue', weight: 7, opacity: 0.45 }).addTo(layerGroup);
                 res.path.forEach(element => {
                     const { lat, lon, name } = element
                     L.popup().setLatLng([lat, lon]).setContent(name).addTo(layerGroup)
@@ -124,7 +124,7 @@
                 let headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
                 let listStations = ''
                 let station = res.path[0].name
-                let finalStr = ''
+                let finalStr ='Distance: '+ res.distanceTraveled/1000+ 'km</br>'
                 let line = currentLine
                 res.path.forEach(element => {
                     station = element.realName

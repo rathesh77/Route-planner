@@ -1,4 +1,4 @@
-const Dijkstra = require('../Dijkstra')
+const Dijkstra = require('./Dijkstra')
 const Graph = require('./Graph')
 const stops = require('./metro-stops.json')
 const express = require('express')
@@ -24,12 +24,14 @@ app.get('/shortest_path/:departure/:destination', (req, res) => {
         return
     }
     console.log(departure, destination)
+    let beginMillis = Date.now()
     const { distanceTraveled, path } = Dijkstra.shortestPath(departure, destination, graph)
     if (!path || !distanceTraveled) {
         res.status(401)
         res.send({ error: 'invalid data' })
         return
     }
+    console.log(`itinéraire calculé en ${(Date.now()) - beginMillis}ms`)
     res.send({
         distanceTraveled, path: path.map((m) => {
             const { lat, lon, name } = stations[m]
@@ -77,23 +79,10 @@ async function run() {
                 const nextStation = lines.get(currentLine.line).get(currentLine.position + 1)
                 const previousStation = lines.get(currentLine.line).get(currentLine.position - 1)
                 if (nextStation) {
-                    for (let k = 0; k < nextStation.length; k++) {
-                        const destination = nextStation[k].name + ' ' + currentLine.line
-                        stations[destination] = { name: nextStation[k].name, lon: nextStation[k].longitude, lat: nextStation[k].latitude }
-                        const distance = parseFloat((getDistanceFromLatLonInKm(currentStop.latitude, currentStop.longitude, nextStation[k].latitude, nextStation[k].longitude) * 1000).toFixed())
-                        graph.addPath(departure, destination, distance)
-
-                    }
+                    getPath(nextStation, currentStop, currentLine)
                 }
                 if (previousStation) {
-                    for (let k = 0; k < previousStation.length; k++) {
-                        const destination = previousStation[k].name + ' ' + currentLine.line
-                        stations[destination] = { name: previousStation[k].name, lon: previousStation[k].longitude, lat: previousStation[k].latitude }
-
-                        const distance = parseFloat((getDistanceFromLatLonInKm(currentStop.latitude, currentStop.longitude, previousStation[k].latitude, previousStation[k].longitude) * 1000).toFixed())
-                        graph.addPath(departure, destination, distance)
-
-                    }
+                    getPath(previousStation, currentStop, currentLine)
                 }
             }
             else {
@@ -103,16 +92,21 @@ async function run() {
 
         }
     }
-    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet-Les Halles rer-b', 1)
-    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', 1)
 }
+function getPath(previousStation, currentStop, currentLine) {
+    let min = previousStation[0]
+    let minDistance = parseFloat((getDistanceFromLatLonInKm(currentStop.latitude, currentStop.longitude, previousStation[0].latitude, previousStation[0].longitude) * 1000).toFixed())
+    stations[previousStation[0].name + ' ' + currentLine.line] = { name: previousStation[0].name, lon: previousStation[0].longitude, lat: previousStation[0].latitude }
 
+    for (let k = 1; k < previousStation.length; k++) {
+        const destination = previousStation[k].name + ' ' + currentLine.line
+        stations[destination] = { name: previousStation[k].name, lon: previousStation[k].longitude, lat: previousStation[k].latitude }
+        let distance = parseFloat((getDistanceFromLatLonInKm(currentStop.latitude, currentStop.longitude, previousStation[k].latitude, previousStation[k].longitude) * 1000).toFixed())
+        if (minDistance > distance) {
+            min = previousStation[k]
+            minDistance = distance
+        }
 
-
-
-/*
-line = Map{
-    'rer-A' => ['noisiel', ...]
+    }
+    graph.addPath(currentStop.name + ' ' + currentLine.line, min.name + ' ' + currentLine.line, minDistance)
 }
-
-*/
