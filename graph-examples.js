@@ -7,7 +7,6 @@ let wikipediaExample = function () {
     for (let i = 0; i < nodes.length; i++)
         g.addNoeud(nodes[i])
 
-
     g.addPath('A', 'B', 85)
     g.addPath('B', 'F', 80)
     g.addPath('F', 'I', 250)
@@ -68,8 +67,7 @@ let otherExample = function () {
     g.addPath('E', 'D', 2)
     g.addPath('E', 'F', 5)
     g.addPath('D', 'F', 2)
-
-
+    
     return g
 
 }
@@ -86,8 +84,8 @@ let transportEnCommun = function () {
     g.addPath('Châtelet', 'Pont Marie', 5)
     g.addPath('Pont Marie', 'Sully-Morland', 4)
 
-
     return g
 }
 
-module.exports = { wikipediaExample, codeForGeeksExample, otherExample, transportEnCommun }
+
+module.exports = [wikipediaExample,codeForGeeksExample, otherExample, transportEnCommun]
