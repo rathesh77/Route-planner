@@ -14,47 +14,50 @@ module.exports = class Dijkstra {
      */
     static shortestPath(departure, destination, graph, oldPossiblePaths, pathTaken, initialNode, fullPath) {
 
-        if (!initialNode)
-            initialNode = departure
-
-        if (initialNode == destination) {
+        if (departure == destination) {
             return 'starting node and ending node are the same...'
         }
-        if (!fullPath)
-            fullPath = new Map()
-        if (!oldPossiblePaths)
-            oldPossiblePaths = []
-        if (!pathTaken) {
-            pathTaken = { distanceTraveled: 0, previous: departure }
-        }
-        //console.log('departure', departure);
-        const currentNode = graph.getNoeuds().get(departure)
-        const endNode = graph.getNoeuds().get(destination)
-        if (!currentNode) {
-            return 'starting node not found'
-        }
-        if (!endNode) {
-            return 'ending node not found'
-        }
-        if (departure == destination) {
-            let path = [destination]
-            let previous = fullPath.get(destination)
-            path.unshift(previous)
-            while (previous != initialNode) {
-                previous = fullPath.get(previous)
-                path.unshift(previous)
+        while (departure != destination) {
+            if (!initialNode)
+                initialNode = departure
+
+            if (!fullPath)
+                fullPath = new Map()
+            if (!oldPossiblePaths)
+                oldPossiblePaths = []
+            if (!pathTaken) {
+                pathTaken = { distanceTraveled: 0, previous: departure }
             }
-            return { distanceTraveled: pathTaken.distanceTraveled, path }
+            const currentNode = graph.getNoeuds().get(departure)
+            const endNode = graph.getNoeuds().get(destination)
+            if (!currentNode) {
+                return 'starting node not found'
+            }
+            if (!endNode) {
+                return 'ending node not found'
+            }
+
+            const adjacentNodes = currentNode.getAdj()
+            const { nextMinimumPath, newPossiblePaths } = this.getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken)
+            if (!nextMinimumPath)
+                return 'node not found'
+
+            if (!fullPath.has(nextMinimumPath.nextNode.valeur))
+                fullPath.set(nextMinimumPath.nextNode.valeur, nextMinimumPath.previous.valeur)
+
+            departure = nextMinimumPath.nextNode.valeur
+            oldPossiblePaths = newPossiblePaths
+            pathTaken = nextMinimumPath
         }
-        const adjacentNodes = currentNode.getAdj()
-        const { nextMinimumPath, newPossiblePaths } = this.getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken)
-        if (!nextMinimumPath)
-            return 'node not found'
+        let path = [destination]
+        let previous = fullPath.get(destination)
+        path.unshift(previous)
+        while (previous != initialNode) {
+            previous = fullPath.get(previous)
+            path.unshift(previous)
+        }
 
-        if (!fullPath.has(nextMinimumPath.nextNode.valeur))
-            fullPath.set(nextMinimumPath.nextNode.valeur, nextMinimumPath.previous.valeur)
-
-        return this.shortestPath(nextMinimumPath.nextNode.valeur, destination, graph, newPossiblePaths, nextMinimumPath, initialNode, fullPath)
+        return { distanceTraveled: pathTaken.distanceTraveled, path }
     }
     /**
      * @param {Array} adjacentNodes
