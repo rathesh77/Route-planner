@@ -2,14 +2,9 @@ const Noeud = require("./Noeud")
 
 module.exports = class {
     /**
-     * 
      * @param {String} departure 
      * @param {String} destination 
      * @param {Graph} graph
-     * @param {Array} oldPossiblePaths 
-     * @param {Object} pathTaken 
-     * @param {String} initialNode 
-     * @param {Map} fullPath
      * @returns {Object} { distanceTraveled, path }
      */
     static shortestPath(departure, destination, graph) {
