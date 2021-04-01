@@ -4,15 +4,14 @@ const stops = require('./metro-stops.json')
 const express = require('express')
 const app = express()
 const cors = require('cors')
-let graph = new Graph()
-let stations = {}
 app.use(cors())
 
+let graph = new Graph()
+let stations = {}
 
 app.listen(8080, () => {
     console.log('app started on port 8080');
     run()
-    console.log('graph generated')
 })
 
 app.get('/shortest_path/:departure/:destination', (req, res) => {
@@ -24,10 +23,11 @@ app.get('/shortest_path/:departure/:destination', (req, res) => {
         return
     }
     let beginMillis = Date.now()
-    const { distanceTraveled, path } = Dijkstra.shortestPath(departure, destination, graph)
+    const result = Dijkstra.shortestPath(departure, destination, graph)
+    const { distanceTraveled, path } = result
     if (!path || !distanceTraveled) {
         res.status(401)
-        res.send({ error: 'invalid data' })
+        res.send({ error: result })
         return
     }
     console.log(`itinéraire calculé en ${(Date.now()) - beginMillis}ms`)
@@ -40,8 +40,8 @@ app.get('/shortest_path/:departure/:destination', (req, res) => {
 })
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1);  // deg2rad below
+    const R = 6371;
+    const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -49,7 +49,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
+    const d = R * c;
     return d;
 }
 
@@ -93,9 +93,15 @@ async function run() {
 
         }
     }
-    let coords = getDistanceFromLatLonInKm(48.861464, 2.346844, 48.85857, 2.347933) 
+    let coords = getDistanceFromLatLonInKm(48.861464, 2.346844, 48.85857, 2.347933)
 
-    coords = getDistanceFromLatLonInKm(48.872608, 2.329707, 48.870721, 2.332255) 
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-7', coords)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-4', coords)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-1', coords)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-14', coords)
+    graph.addPath('Châtelet-Les Halles rer-a', 'Châtelet ligne-11', coords)
+
+    coords = getDistanceFromLatLonInKm(48.872608, 2.329707, 48.870721, 2.332255)
 
     graph.addPath('Auber rer-a', 'Opéra ligne-8', coords)
 

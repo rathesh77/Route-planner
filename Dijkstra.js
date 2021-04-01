@@ -1,6 +1,6 @@
 const Noeud = require("./Noeud")
 
-module.exports = class Dijkstra {
+module.exports = class {
     /**
      * 
      * @param {String} departure 
@@ -12,22 +12,17 @@ module.exports = class Dijkstra {
      * @param {Map} fullPath
      * @returns {Object} { distanceTraveled, path }
      */
-    static shortestPath(departure, destination, graph, oldPossiblePaths, pathTaken, initialNode, fullPath) {
+    static shortestPath(departure, destination, graph) {
 
         if (departure == destination) {
             return 'starting node and ending node are the same...'
         }
+        let fullPath = new Map()
+        let oldPossiblePaths = []
+        let pathTaken = { distanceTraveled: 0, previous: departure }
+        let initialNode = departure
         while (departure != destination) {
-            if (!initialNode)
-                initialNode = departure
 
-            if (!fullPath)
-                fullPath = new Map()
-            if (!oldPossiblePaths)
-                oldPossiblePaths = []
-            if (!pathTaken) {
-                pathTaken = { distanceTraveled: 0, previous: departure }
-            }
             const currentNode = graph.getNoeuds().get(departure)
             const endNode = graph.getNoeuds().get(destination)
             if (!currentNode) {
@@ -39,8 +34,6 @@ module.exports = class Dijkstra {
 
             const adjacentNodes = currentNode.getAdj()
             const { nextMinimumPath, newPossiblePaths } = this.getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken)
-            if (!nextMinimumPath)
-                return 'node not found'
 
             if (!fullPath.has(nextMinimumPath.nextNode.valeur))
                 fullPath.set(nextMinimumPath.nextNode.valeur, nextMinimumPath.previous.valeur)
