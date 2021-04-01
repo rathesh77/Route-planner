@@ -14,9 +14,14 @@ module.exports = class {
      */
     static shortestPath(departure, destination, graph) {
 
+        if (!departure || !destination) {
+            return 'you need to specify two nodes'
+        }
+
         if (departure == destination) {
             return 'starting node and ending node are the same...'
         }
+
         let fullPath = new Map()
         let oldPossiblePaths = []
         let pathTaken = { distanceTraveled: 0, previous: departure }
