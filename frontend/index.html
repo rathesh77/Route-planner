@@ -105,7 +105,7 @@
         }
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            minZoom:10
+            minZoom: 10
         }).addTo(map);
 
         let layerGroup = L.layerGroup().addTo(map);
@@ -114,7 +114,7 @@
         function httpGetAsync(theUrl, callback, body) {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                if (xmlHttp.readyState == 4)
                     callback(xmlHttp.responseText);
             }
             xmlHttp.open("GET", theUrl, true); // true for asynchronous 
@@ -127,13 +127,29 @@
             layerGroup.clearLayers()
             const departure = document.getElementById('departure_input').value
             const destination = document.getElementById('destination_input').value
+            if (!departure || !destination) {
+                alert("you need to specify a valid departure and destination")
+                return
+            }
             httpGetAsync(`http://localhost:8080/shortest_path/${departure}/${destination}`, (response) => {
 
                 let res = JSON.parse(response)
-                const latlngs = res.path.map((m) => {
-                    return [m.lat, m.lon]
-                })
-                map.fitBounds(latlngs,{minZoom:10})
+                if (!res.distanceTraveled) {
+                    alert(res.error)
+                    return
+                }
+                const reducer = (acc, curr, index, elements) => {
+                    if (index < elements.length - 1 && index > 0) {
+                        if (curr.name.split(' ').splice(-1)[0] != elements[index - 1].name.split(' ').splice(-1)[0] && curr.name.split(' ').splice(-1)[0] != elements[index + 1].name.split(' ').splice(-1)[0]) {
+                            res.path.splice(index, 1)
+                            return acc
+                        }
+                    }
+                    acc.push([curr.lat, curr.lon]);
+                    return acc;
+                }
+                const latlngs = res.path.reduce(reducer, [])
+                map.fitBounds(latlngs, { minZoom: 10 })
                 res.path.forEach(element => {
                     const { lat, lon, realName } = element
                     let m = L.marker([lat, lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(realName)
@@ -149,7 +165,7 @@
                 let finalStr = 'Distance: ' + res.distanceTraveled.toFixed(2) + 'km</br>'
                 let coords = []
                 let line = null
-                
+
                 res.path.forEach(element => {
                     station = element.realName
 
