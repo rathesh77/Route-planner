@@ -51,6 +51,27 @@
         .line-name {
             font-weight: bold;
         }
+
+        .suggestions {
+            position: absolute;
+            background-color: white;
+            top: 40px;
+            z-index: 10;
+            list-style-type: none;
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        li:hover {
+            cursor: pointer;
+            background-color: #e4e6e8;
+            color: black;
+        }
+
+        li {
+            padding: 5px;
+
+        }
     </style>
 </head>
 
@@ -60,16 +81,22 @@
         <div style="background-color: #1A73E8 !important; padding: 30px;">
             <div class="input-group mb-3">
                 <span class="input-group-text">Départ</span>
-                <input type="text" id="departure_input" class="form-control" value="Torcy rer-a">
+                <input type="text" id="departure_input" class="form-control" value="Torcy rer-a"
+                    onkeyup="giveSuggestions(event, this.nextSibling)">
+                <div class="suggestions">
 
+                </div>
             </div>
 
             <div class="input-group mb-3">
-                <span class="input-group-text">Destination</span>
-                <input type="text" id="destination_input" class="form-control" value="Mitry-Claye rer-b">
+                <span class="input-group-text">Arrivée</span>
+                <input type="text" id="destination_input" class="form-control" value="Mitry-Claye rer-b"
+                    onkeyup="giveSuggestions(event, this.nextSibling)">
+                <div class="suggestions">
 
+                </div>
             </div>
-            <button type="button" class="btn btn-success" onclick="computePath()">Valider</button>
+            <button type="button" class="btn btn-success" id="btnValidate" onclick="computePath()">Valider</button>
         </div>
         <div id="path-indicator"></div>
     </div>
@@ -78,7 +105,14 @@
     <div id="map">
 
     </div>
+    <script src="./stations.js"></script>
     <script>
+        stations = stations.reduce((acc, curr) => {
+            let arr = []
+            curr.lines.forEach((el) => { arr.push(curr.name + ' ' + el.line) })
+            return acc.concat(arr)
+        }, [])
+
         let map = L.map('map').setView([48.8534, 2.3488], 7);
         let lineColors = {
             'rer-a': '#DD5E3C',
@@ -110,7 +144,20 @@
 
         let layerGroup = L.layerGroup().addTo(map);
 
-        layerGroup.clearLayers();
+        function giveSuggestions(e, ns) {
+            Array.from(document.getElementsByClassName('suggestions')).forEach((s) => { s.innerHTML = '' })
+            const givenStation = e.target.value
+            const regex = new RegExp(`^${givenStation}.{0,}$`, 'gi')
+            let matches = stations.filter((s) => s.match(regex))
+            if (matches.length && givenStation.length) {
+                ns.nextSibling.innerHTML += matches.reduce((acc, curr) => `${acc}\n<li onclick='updateInput(event,this)'>${curr}</li>`, '')
+            }
+        }
+        function updateInput(e, parent) {
+            parent.parentNode.previousSibling.previousElementSibling.value = e.target.innerText
+            parent.parentNode.innerHTML = ''
+
+        }
         function httpGetAsync(theUrl, callback, body) {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function () {
@@ -124,20 +171,22 @@
         }
 
         function computePath() {
-            layerGroup.clearLayers()
             const departure = document.getElementById('departure_input').value
             const destination = document.getElementById('destination_input').value
+            const btnValidate = document.getElementById('btnValidate')
+            btnValidate.disabled = true
             if (!departure || !destination) {
                 alert("you need to specify a valid departure and destination")
                 return
             }
             httpGetAsync(`http://localhost:8080/shortest_path/${departure}/${destination}`, (response) => {
-
+                btnValidate.disabled = false
                 let res = JSON.parse(response)
                 if (!res.distanceTraveled) {
                     alert(res.error)
                     return
                 }
+                layerGroup.clearLayers();
                 const reducer = (acc, curr, index, elements) => {
                     if (index < elements.length - 1 && index > 0) {
                         if (curr.name.split(' ').splice(-1)[0] != elements[index - 1].name.split(' ').splice(-1)[0] && curr.name.split(' ').splice(-1)[0] != elements[index + 1].name.split(' ').splice(-1)[0]) {

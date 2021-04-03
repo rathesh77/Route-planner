@@ -8,7 +8,7 @@ app.use(cors())
 
 let graph = new Graph()
 let stations = {}
-
+let computedPaths = new Map()
 app.listen(8080, () => {
     console.log('app started on port 8080');
     run()
@@ -22,7 +22,19 @@ app.get('/shortest_path/:departure/:destination', (req, res) => {
         res.send({ error: 'you need to supply a departure and a destination' })
         return
     }
+    if (computedPaths.get(departure) && computedPaths.get(departure).get(destination)) {
+        console.log('itineraire deja calculé');
+        res.send({
+            distanceTraveled: computedPaths.get(departure).get(destination).distanceTraveled, path: computedPaths.get(departure).get(destination).path.map((m) => {
+                const { lat, lon, name } = stations[m]
+                return { name: m, lat, lon, realName: name }
+            })
+        })
+        return
+    }
+
     let beginMillis = Date.now()
+
     const result = Dijkstra.shortestPath(departure, destination, graph)
     const { distanceTraveled, path } = result
     if (!path || !distanceTraveled) {
@@ -30,6 +42,11 @@ app.get('/shortest_path/:departure/:destination', (req, res) => {
         res.send({ error: result })
         return
     }
+    if ( !computedPaths.get(departure) ) {
+        computedPaths.set(departure, new Map())
+    }
+
+    computedPaths.get(departure).set(destination, {distanceTraveled, path})
     console.log(`itinéraire calculé en ${(Date.now()) - beginMillis}ms`)
     res.send({
         distanceTraveled, path: path.map((m) => {
