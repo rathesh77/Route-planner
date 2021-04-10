@@ -107,13 +107,8 @@
     </div>
     <script src="./stations.js"></script>
     <script>
-        stations = stations.reduce((acc, curr) => {
-            let arr = []
-            curr.lines.forEach((el) => { arr.push(curr.name + ' ' + el.line) })
-            return acc.concat(arr)
-        }, [])
 
-        let map = L.map('map').setView([48.8534, 2.3488], 7);
+        let map = L.map('map').setView([48.8534, 2.3488], 7)
         let lineColors = {
             'rer-a': '#DD5E3C',
             'rer-b': 'blue',
@@ -140,13 +135,13 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             minZoom: 10
-        }).addTo(map);
+        }).addTo(map)
 
-        let layerGroup = L.layerGroup().addTo(map);
+        let layerGroup = L.layerGroup().addTo(map)
 
         function giveSuggestions(e, ns) {
             Array.from(document.getElementsByClassName('suggestions')).forEach((s) => { s.innerHTML = '' })
-            const givenStation = e.target.value
+            const givenStation = e.target.value.trim()
             const regex = new RegExp(`^${givenStation}.{0,}$`, 'gi')
             let matches = stations.filter((s) => s.match(regex))
             if (matches.length && givenStation.length) {
@@ -159,15 +154,15 @@
 
         }
         function httpGetAsync(theUrl, callback, body) {
-            var xmlHttp = new XMLHttpRequest();
+            var xmlHttp = new XMLHttpRequest()
             xmlHttp.onreadystatechange = function () {
                 if (xmlHttp.readyState == 4)
-                    callback(xmlHttp.responseText);
+                    callback(xmlHttp.responseText)
             }
-            xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-            xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xmlHttp.open("GET", theUrl, true)
+            xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
 
-            xmlHttp.send(null);
+            xmlHttp.send(null)
         }
 
         function computePath() {
@@ -186,7 +181,7 @@
                     alert(res.error)
                     return
                 }
-                layerGroup.clearLayers();
+                layerGroup.clearLayers()
                 const reducer = (acc, curr, index, elements) => {
                     if (index < elements.length - 1 && index > 0) {
                         if (curr.name.split(' ').splice(-1)[0] != elements[index - 1].name.split(' ').splice(-1)[0] && curr.name.split(' ').splice(-1)[0] != elements[index + 1].name.split(' ').splice(-1)[0]) {
@@ -194,8 +189,8 @@
                             return acc
                         }
                     }
-                    acc.push([curr.lat, curr.lon]);
-                    return acc;
+                    acc.push([curr.lat, curr.lon])
+                    return acc
                 }
                 const latlngs = res.path.reduce(reducer, [])
                 map.fitBounds(latlngs, { minZoom: 10 })
@@ -203,9 +198,9 @@
                     const { lat, lon, realName } = element
                     let m = L.marker([lat, lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(realName)
                     m.on('mouseover', function (e) {
-                        this.openPopup();
-                    });
-                });
+                        this.openPopup()
+                    })
+                })
 
                 let currentLine = res.path[0].name.split(' ').splice(-1)[0]
                 let headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
@@ -226,16 +221,16 @@
                     }
                     else {
                         coords.push([element.lat, element.lon])
-                        L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup);
+                        L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
                         coords = [coords.slice(-1)[0]]
                         finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat(`</ul>`)))
                         listStations = ``
                         currentLine = line
                         headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
                     }
-                });
+                })
                 finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat('</ul>')))
-                L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup);
+                L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
                 document.getElementById('path-indicator').innerHTML = finalStr
             })
 
