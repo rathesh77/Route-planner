@@ -2,112 +2,95 @@ const Noeud = require("./Noeud")
 
 module.exports = class {
     /**
-     * @param {String} departure 
+     * @param {String} depart 
      * @param {String} destination 
      * @param {Graph} graph
      * @returns {Object} { distanceTraveled, path }
      */
-    static shortestPath(departure, destination, graph) {
+    static shortestPath(depart, destination, graph) {
 
-        if (!departure || !destination) {
+        if (!depart || !destination) {
             return 'you need to specify two nodes'
         }
 
-        if (departure == destination) {
+        if (depart == destination) {
             return 'starting node and ending node are the same...'
         }
+        if (!graph.getNoeuds().get(depart) || !graph.getNoeuds().get(destination)) {
+            return 'starting node or ending node not found...'
+        }
 
+        let memoire = new Map()
+        let initialNode = depart
+        let totalDistance = 0
+        let precedent = depart
         let fullPath = new Map()
-        let oldPossiblePaths = []
-        let pathTaken = { distanceTraveled: 0, previous: departure }
-        let initialNode = departure
-        while (departure != destination) {
 
-            const currentNode = graph.getNoeuds().get(departure)
-            const endNode = graph.getNoeuds().get(destination)
-            if (!currentNode) {
-                return 'starting node not found'
+        while (depart != destination) {
+            let temp = new Map()
+            let noeudsAdjacents = graph.getNoeuds().get(depart).getAdj()
+            let distanceMin = noeudsAdjacents.values().next().value.getTete().get(depart).poids + totalDistance
+            let prochainNoeudAPrendre = noeudsAdjacents.values().next().value.valeur
+            for (const noeud of noeudsAdjacents) {
+                let prochaineDistance = noeud.getTete().get(depart).poids + totalDistance
+                let prochainNoeud = noeud.valeur
+                if (prochainNoeud == precedent) {
+                    continue
+                }
+                if (memoire.has(prochainNoeud)) {
+
+                    if (memoire.get(prochainNoeud).distanceParcouru > prochaineDistance) {
+                        memoire.get(prochainNoeud).distanceParcouru = prochaineDistance
+                        memoire.get(prochainNoeud).depuis = depart
+                    }
+                    continue
+                }
+                if (prochaineDistance < distanceMin) {
+                    prochainNoeudAPrendre = prochainNoeud
+                    distanceMin = prochaineDistance
+                }
+
+                temp.set(prochainNoeud, { distanceParcouru: prochaineDistance, depuis: depart })
             }
-            if (!endNode) {
-                return 'ending node not found'
+            precedent = depart
+
+            for (const [fin, debut] of memoire) {
+                let prochaineDistance = debut.distanceParcouru
+                let prochainNoeud = fin
+
+                if (prochaineDistance < distanceMin) {
+                    prochainNoeudAPrendre = prochainNoeud
+                    distanceMin = prochaineDistance
+                    precedent = debut.depuis
+                }
             }
 
-            const adjacentNodes = currentNode.getAdj()
-            const { nextMinimumPath, newPossiblePaths } = this.getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken)
+            memoire = new Map([...memoire, ...temp])
 
-            if (!fullPath.has(nextMinimumPath.nextNode.valeur))
-                fullPath.set(nextMinimumPath.nextNode.valeur, nextMinimumPath.previous.valeur)
 
-            departure = nextMinimumPath.nextNode.valeur
-            oldPossiblePaths = newPossiblePaths
-            pathTaken = nextMinimumPath
+            if (memoire.has(prochainNoeudAPrendre)) {
+                memoire.delete(prochainNoeudAPrendre)
+            }
+
+            depart = prochainNoeudAPrendre
+            totalDistance = distanceMin
+
+            if (!fullPath.has(prochainNoeudAPrendre))
+                fullPath.set(prochainNoeudAPrendre, precedent)
+            // repeter...
+
         }
+        //console.log(fullPath)
+
         let path = [destination]
-        let previous = fullPath.get(destination)
-        path.unshift(previous)
-        while (previous != initialNode) {
-            previous = fullPath.get(previous)
-            path.unshift(previous)
-        }
 
-        return { distanceTraveled: pathTaken.distanceTraveled, path }
+        let end = destination
+        while (end != initialNode) {
+            end = fullPath.get(end)
+            path.unshift(end)
+        }
+        
+        return { distanceTraveled: totalDistance, path }
     }
-    /**
-     * @param {Array} adjacentNodes
-     * @param {Array} oldPossiblePaths
-     * @param {Noeud} currentNode
-     * @param {Object} pathTaken
-     * @returns {Object} {nextMinimumPath, newPossiblePaths}
-     */
-    static getNextPathsWithTraveledDistance(adjacentNodes, oldPossiblePaths, currentNode, pathTaken) {
 
-        let paths = []
-        let seen = {}
-        let nextMinimumPath = { nextNode: adjacentNodes[0], distanceTraveled: pathTaken.distanceTraveled + adjacentNodes[0].getTete().get(currentNode.valeur).poids, previous: currentNode }
-
-        let index = -1
-        for (let i = 0; i < adjacentNodes.length; i++) {
-            const currentAdjNode = adjacentNodes[i]
-
-            if (currentAdjNode.valeur == pathTaken.previous.valeur) {
-                continue
-            }
-            const nextDistance = currentAdjNode.getTete().get(currentNode.valeur).poids
-            const newDistanceTraveled = pathTaken.distanceTraveled + nextDistance
-
-            paths.push({ nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode })
-            seen[currentAdjNode.valeur] = { distanceTraveled: newDistanceTraveled, index: paths.length - 1, previous: currentNode }
-
-            if (nextMinimumPath.distanceTraveled > newDistanceTraveled) {
-                nextMinimumPath = { nextNode: currentAdjNode, distanceTraveled: newDistanceTraveled, previous: currentNode }
-                index = paths.length - 1
-            }
-        }
-        for (let i = 0; i < oldPossiblePaths.length; i++) {
-            const alternativePath = seen[oldPossiblePaths[i].nextNode.valeur]
-
-            if (alternativePath) {
-                if (oldPossiblePaths[i].distanceTraveled <= alternativePath.distanceTraveled) {
-
-                    paths[alternativePath.index].distanceTraveled = oldPossiblePaths[i].distanceTraveled
-                    paths[alternativePath.index].previous = oldPossiblePaths[i].previous
-                }
-                if (nextMinimumPath.distanceTraveled >= paths[alternativePath.index].distanceTraveled) {
-                    nextMinimumPath = paths[alternativePath.index]
-                    index = alternativePath.index
-                }
-            }
-            else {
-                paths.push(oldPossiblePaths[i])
-                if (oldPossiblePaths[i].distanceTraveled < nextMinimumPath.distanceTraveled) {
-                    nextMinimumPath = oldPossiblePaths[i]
-                    index = paths.length - 1
-                }
-            }
-
-        }
-        if (index > -1)
-            paths.splice(index, 1)
-        return { nextMinimumPath, newPossiblePaths: paths }
-    }
 }
