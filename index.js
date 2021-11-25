@@ -4,14 +4,17 @@ const stops = require('./metro-stops.json')
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const Postgres = require('./db/Postgres')
 app.use(cors())
 
 let graph = new Graph()
 let stations = {}
 let computedPaths = new Map()
-app.listen(8080, () => {
+app.listen(8080, async () => {
+    await Postgres.init()
+    await run()
     console.log('app started on port 8080');
-    run()
+
 })
 
 app.get('/shortest_path/:departure/:destination', (req, res) => {
