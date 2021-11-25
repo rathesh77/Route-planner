@@ -32,7 +32,7 @@ module.exports = class Graph {
      * @returns {Array}
      */
     addPath(source, dest, poids) {
-        if (!poids) {
+        if (poids == null) {
             console.log('ajoutez un poids...')
             return
         }
