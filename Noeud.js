@@ -4,12 +4,13 @@ module.exports = class Noeud {
      * 
      * @param {String} valeur 
      */
-    constructor(valeur) {
+    constructor(valeur, info) {
         /*
             tete format : [ 'tete.valeur' : {tete: stationHead, poids: 15} ]
         */
         this.tete = new Map()
         this.valeur = valeur
+        this.info = info == undefined ? null : info
         this.adj = []
     }
     getTete() {

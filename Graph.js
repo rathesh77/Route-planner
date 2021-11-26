@@ -15,11 +15,11 @@ module.exports = class Graph {
      * @param {String} valeur 
      * @returns {Noeud}
      */
-    addNoeud(valeur) {
+    addNoeud(valeur, info) {
         if (this.noeuds.has(valeur)) {
             return this.noeuds.get(valeur)
         }
-        const newNoeud = new Noeud(valeur)
+        const newNoeud = new Noeud(valeur, info)
         this.noeuds.set(valeur, newNoeud)
         return newNoeud
     }
@@ -31,13 +31,14 @@ module.exports = class Graph {
      * @param {Number} poids 
      * @returns {Array}
      */
-    addPath(source, dest, poids) {
-        if (!poids) {
+    addPath(source, dest, poids, sourceInfo, destInfo) {
+        //console.log(source, dest, poids, sourceInfo, destInfo)
+        if (poids == null) {
             console.log('ajoutez un poids...')
             return
         }
-        const sourceNoeud = this.addNoeud(source);
-        const destinationNoeud = this.addNoeud(dest);
+        const sourceNoeud = this.addNoeud(source, sourceInfo);
+        const destinationNoeud = this.addNoeud(dest, destInfo);
 
         sourceNoeud.addAdj(destinationNoeud, poids)
         destinationNoeud.addAdj(sourceNoeud, poids)
