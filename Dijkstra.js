@@ -82,12 +82,12 @@ module.exports = class {
         }
         //console.log(fullPath)
 
-        let path = [graph.getNoeuds().get(destination)]
+        let path = [destination]
 
         let end = destination
         while (end != initialNode) {
             end = fullPath.get(end)
-            path.unshift(graph.getNoeuds().get(end))
+            path.unshift(end)
         }
         
         return { distanceTraveled: totalDistance, path }
