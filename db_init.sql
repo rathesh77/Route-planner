@@ -88,7 +88,6 @@ select * from transfers;
 select * from trips;
 select * from stop_times;
 
-CREATE UNIQUE INDEX trips_stops_idx ON stop_times (stop_id, trip_id);
 drop index trips_stops_idx;
 SELECT 
 	s1.stop_name AS departure, 
