@@ -9,7 +9,7 @@ class StopTimes {
      * @param tableName {String}
      *  
      */
-     static async getAll() {
+    static async getAll() {
         const result = await Postgres.client.query(
             `
             SELECT 
@@ -45,24 +45,67 @@ class StopTimes {
         )
         return result.rows
     }
-    static async getNextStopFromStopIdAndTripId(stopId, tripId, stopSequence) {
+    static async getStopsFollowingCurrentStopOnLongestTrip(stopId) {
+
         const result = await Postgres.client.query(
             `
+            -- SELECTIONNE TOUS LES STOP TIMES SANS DUPLICATAS DE STOP_ID
+
             SELECT
-                stop_sequence,
-                stops.stop_id,
-                stops.stop_name
+                s.stop_id,
+                st.departure_time,
+                st.stop_sequence,
+                f.to_stop_id as transfer_stop_id
             FROM
-                stop_times,
-                stops
-            WHERE
-                (stop_sequence = ${stopSequence} + 1
-                OR stop_sequence = ${stopSequence} - 1)
-                AND stops.stop_id = stop_times.stop_id
-                AND trip_id = ${tripId}
+                stop_times AS st,
+                stops AS s
+                LEFT JOIN transfers AS f ON s.stop_id = f.from_stop_id,
+                (SELECT
+                    _st.stop_id,
+                     _st.trip_id,
+                     count_stops
+                FROM
+                    stops AS _s,
+                    stop_times AS _st,
+                    (SELECT
+                        trip_id,
+                        count(stop_id) AS count_stops
+                    FROM
+                        stop_times
+                    GROUP BY
+                        trip_id
+                    ) AS sub -- tous les trips et leur nb de stops desservis
+                WHERE
+                    _s.stop_id = _st.stop_id
+                    AND sub.trip_id = _st.trip_id
+                    AND _s.stop_id = ${stopId}
+                    AND _st.trip_id =
+                    (SELECT
+                        st.trip_id
+                    FROM
+                        stop_times AS st, -- tous les trips avec chaque arrêts (duplicats de trip_id)
+                        (SELECT
+                            trip_id,
+                            count(stop_id) AS count_stops
+                        FROM
+                            stop_times
+                        GROUP BY
+                            trip_id
+                        ) AS sub -- tous les trips et leur nb de stops desservis
+                    WHERE
+                        st.trip_id = sub.trip_id
+                        AND st.stop_id = _s.stop_id
+                        ORDER BY count_stops DESC
+                        LIMIT 1
+                    )
+                ) AS sub
+            WHERE st.trip_id = sub.trip_id
+            AND st.stop_id = s.stop_id
+            ORDER BY stop_sequence
 
             `
         )
+
         return result.rows
     }
 
@@ -71,6 +114,6 @@ class StopTimes {
 /**
  *  @type {String}
  */
- StopTimes.tableName = 'stop_times'
+StopTimes.tableName = 'stop_times'
 
 module.exports = StopTimes

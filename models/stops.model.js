@@ -2,13 +2,19 @@ const Postgres = require('../db/Postgres')
 const Transfers = require('./transfers.model')
 class Stops {
 
-    static async getAll() {
+    static async findById(stopId) {
         const result = await Postgres.client.query(
-            `SELECT * from ${this.tableName}
-            LIMIT 10
             `
+                SELECT
+                    *
+                FROM
+                    ${this.tableName}
+                WHERE
+                    stop_id = ${stopId}
+            `
+
         )
-        return result.rows
+        return result.rows[0]
     }
 
     static async getDirectTransfersFromStations() {
@@ -32,6 +38,7 @@ class Stops {
         )
         return result.rows
     }
+
 }
 /**
  *  @type {String}

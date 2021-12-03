@@ -9,7 +9,7 @@ const Postgres = require('./db/Postgres')
 const StopTimes = require('./models/stop_times.model')
 const Transfers = require('./models/transfers.model')
 const Noeud = require('./Noeud')
-
+const Stops = require('./models/stops.model')
 app.use(cors())
 
 let graph = new Graph()
@@ -17,14 +17,13 @@ let stations = {}
 let computedPaths = new Map()
 app.listen(8080, async () => {
     await Postgres.init()
-    await run()
-    console.log(graph.getNoeuds().get('Torcy'))
+    await buildTreeFromDeparture(1636)
+    console.log(graph)
     console.log('app started on port 8080');
-    run()
 })
 
 app.get('/shortest_path/:departure/:destination', (req, res) => {
- 
+
 })
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -44,33 +43,25 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 function deg2rad(deg) {
     return deg * (Math.PI / 180)
 }
-async function run() {
-
-    const stops = await StopTimes.getAll()
-    let currTripId = stops[0].trip_id
-    let currStopName = stops[0].stop_name
-    let currStopId = stops[0].stop_id
-    graph.addNoeud(currStopName)
-
-    for (let i = 1; i < stops.length; i++) {
-        const { route_long_name, trip_id, stop_id, stop_name, departure_time } = stops[i]
-        console.log(route_long_name, stop_name, departure_time, trip_id)
-        if (trip_id === currTripId) {
-            graph.addPath(currStopName, stop_name, 1)
-        }
-        console.log(currStopName, '=>' , stop_name, '----')
-        const transfersOfCurrentStop = await Transfers.getTransferByFromStop_id(currStopId)
-        console.log(transfersOfCurrentStop)
-        for (const transfer of transfersOfCurrentStop) {
-            console.log(currStopName, transfer.stop_name)
-
-            graph.addPath(currStopName, transfer.stop_name, 1)
-
-        }
+async function buildTreeFromDeparture(stopId) {
+    try {
+        const currentStop = await Stops.findById(stopId)
         
-        currTripId = trip_id
-        currStopName = stop_name
-        currStopId = stop_id
+        const stopsFromCurrentStopTrip = await StopTimes.getStopsFollowingCurrentStopOnLongestTrip(currentStop.stop_id)
+        let previousStopId = stopsFromCurrentStopTrip.shift().stop_id
+        graph.addNoeud(previousStopId)
+        for (const stop of stopsFromCurrentStopTrip) {
+            const { transfer_stop_id, stop_id } = stop
+            if (previousStopId != stop_id) {
+                graph.addPath(previousStopId, stop_id, 1)
+                previousStopId = stop_id
+            }
+            if (transfer_stop_id != null) {
+                graph.addPath(stop_id, transfer_stop_id, 1)
+                //await buildTreeFromDeparture(transfer_stop_id)
+            }
+        }
+    } catch (e) {
+        console.log(e.hint)
     }
-    
 }
