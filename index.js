@@ -65,7 +65,7 @@ async function buildTreeFromDeparture(stopId, arrivalStopId) {
             }
             if (transfer_stop_id != null) {
                 graph.addPath(stop_id, transfer_stop_id, 1)
-                await buildTreeFromDeparture(transfer_stop_id, arrivalStopId)
+                 buildTreeFromDeparture(transfer_stop_id, arrivalStopId)
             }
         }
   

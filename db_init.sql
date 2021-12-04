@@ -114,10 +114,11 @@ WHERE
 	AND s2.stop_id = t.to_stop_id;
 
 
--- SELECTIONNE TOUS LES STOP TIMES SANS DUPLICATAS DE STOP_ID
-
+-- SELECTIONNE LE PLUS GRAND TRIP D'UNE STATION ${stopId}
 SELECT
 	s.stop_id,
+	st.trip_id,
+	s.stop_name,
 	s.stop_lat,
 	s.stop_lon,
 	st.departure_time,
@@ -137,38 +138,29 @@ FROM
 	FROM
 		stops AS _s,
 		stop_times AS _st,
-		(SELECT
-			trip_id,
-			count(stop_id) AS count_stops
-		FROM
-			stop_times
-		GROUP BY
-			trip_id
-		) AS sub -- tous les trips et leur nb de stops desservis
-	WHERE
-		_s.stop_id = _st.stop_id
-		AND sub.trip_id = _st.trip_id
-		AND _s.stop_id = 1636
-		AND _st.trip_id =
-		(SELECT
-			st.trip_id
-		FROM
-			stop_times AS st, -- tous les trips avec chaque arrêts (duplicats de trip_id)
+	 	(SELECT 
+	 		count(st.stop_id) as count_stops,
+	 		st.trip_id
+	 	FROM
 			(SELECT
-				trip_id,
-				count(stop_id) AS count_stops
+				trip_id
 			FROM
-				stop_times
+				stop_times as st
+			 WHERE st.stop_id = 1636
 			GROUP BY
 				trip_id
-			) AS sub -- tous les trips et leur nb de stops desservis
-		WHERE
-			st.trip_id = sub.trip_id
-			AND st.stop_id = _s.stop_id
-			ORDER BY count_stops DESC
-			LIMIT 1
-		)
+			) AS sub,
+	 		stop_times as st
+	 	WHERE
+	 		st.trip_id = sub.trip_id
+	 	GROUP BY st.trip_id
+	 	ORDER BY count_stops DESC
+	 	LIMIT 1) AS sub
+	WHERE
+		_s.stop_id = _st.stop_id
+	 	AND _s.stop_id = 1636
+		AND sub.trip_id = _st.trip_id
 	) AS sub
 WHERE st.trip_id = sub.trip_id
 AND st.stop_id = s.stop_id
-ORDER BY stop_sequence
+ORDER BY stop_sequence;
