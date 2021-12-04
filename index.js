@@ -17,8 +17,9 @@ let stations = {}
 let computedPaths = new Map()
 app.listen(8080, async () => {
     await Postgres.init()
-    await buildTreeFromDeparture(1636)
+    await buildTreeFromDeparture(1636, 1885)
     console.log(graph)
+    console.log(Dijkstra.shortestPath(1636, 1885, graph))
     console.log('app started on port 8080');
 })
 
@@ -43,25 +44,29 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 function deg2rad(deg) {
     return deg * (Math.PI / 180)
 }
-async function buildTreeFromDeparture(stopId) {
-    try {
+async function buildTreeFromDeparture(stopId, arrivalStopId) {
+   
         const currentStop = await Stops.findById(stopId)
         
         const stopsFromCurrentStopTrip = await StopTimes.getStopsFollowingCurrentStopOnLongestTrip(currentStop.stop_id)
-        let previousStopId = stopsFromCurrentStopTrip.shift().stop_id
-        graph.addNoeud(previousStopId)
+        let previousStop = stopsFromCurrentStopTrip.shift()
+        graph.addNoeud(previousStop.stop_id)
         for (const stop of stopsFromCurrentStopTrip) {
-            const { transfer_stop_id, stop_id } = stop
+            const { transfer_stop_id, stop_id, stop_lat, stop_lon } = stop
+            const previousStopId = previousStop.stop_id
+            const previousStopLat= previousStop.stop_lat
+            const previousStopLon = previousStop.stop_lon
             if (previousStopId != stop_id) {
-                graph.addPath(previousStopId, stop_id, 1)
-                previousStopId = stop_id
+                graph.addPath(previousStopId, stop_id, getDistanceFromLatLonInKm(previousStopLat, previousStopLon, stop_lat, stop_lon))
+                if (stop_id == arrivalStopId) {
+                    return 'arrival stop found'
+                }
+                previousStop = stop
             }
             if (transfer_stop_id != null) {
                 graph.addPath(stop_id, transfer_stop_id, 1)
-                //await buildTreeFromDeparture(transfer_stop_id)
+                await buildTreeFromDeparture(transfer_stop_id, arrivalStopId)
             }
         }
-    } catch (e) {
-        console.log(e.hint)
-    }
+  
 }

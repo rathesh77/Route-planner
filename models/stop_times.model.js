@@ -48,22 +48,25 @@ class StopTimes {
     static async getStopsFollowingCurrentStopOnLongestTrip(stopId) {
 
         const result = await Postgres.client.query(
-            `
-            -- SELECTIONNE TOUS LES STOP TIMES SANS DUPLICATAS DE STOP_ID
-
-            SELECT
-                s.stop_id,
-                st.departure_time,
-                st.stop_sequence,
-                f.to_stop_id as transfer_stop_id
-            FROM
-                stop_times AS st,
-                stops AS s
-                LEFT JOIN transfers AS f ON s.stop_id = f.from_stop_id,
+            `            
+                SELECT
+                    s.stop_id,
+                    s.stop_lat,
+                    s.stop_lon,
+                    st.departure_time,
+                    st.stop_sequence,
+                    s2.stop_id as transfer_stop_id,
+                    s2.stop_lat as transfer_stop_lat,
+                    s2.stop_lon as transfer_stop_lon
+                FROM
+                    stop_times AS st,
+                    stops AS s
+                    LEFT JOIN transfers AS f ON s.stop_id = f.from_stop_id
+                    LEFT JOIN stops as s2 on f.to_stop_id = s2.stop_id,
                 (SELECT
                     _st.stop_id,
-                     _st.trip_id,
-                     count_stops
+                    _st.trip_id,
+                    count_stops
                 FROM
                     stops AS _s,
                     stop_times AS _st,
@@ -78,7 +81,7 @@ class StopTimes {
                 WHERE
                     _s.stop_id = _st.stop_id
                     AND sub.trip_id = _st.trip_id
-                    AND _s.stop_id = ${stopId}
+                    AND _s.stop_id = 1636
                     AND _st.trip_id =
                     (SELECT
                         st.trip_id
@@ -99,10 +102,9 @@ class StopTimes {
                         LIMIT 1
                     )
                 ) AS sub
-            WHERE st.trip_id = sub.trip_id
-            AND st.stop_id = s.stop_id
-            ORDER BY stop_sequence
-
+                WHERE st.trip_id = sub.trip_id
+                AND st.stop_id = s.stop_id
+                ORDER BY stop_sequence         
             `
         )
 
