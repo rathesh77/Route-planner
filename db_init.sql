@@ -1,3 +1,4 @@
+drop index if exists trips_stops_idx;
 drop table if exists stops  CASCADE;
 drop table if exists transfers  CASCADE;
 drop table if exists stop_times  CASCADE;
@@ -88,7 +89,15 @@ select * from transfers;
 select * from trips;
 select * from stop_times;
 
-drop index trips_stops_idx;
+CREATE UNIQUE INDEX trips_stops_idx ON stop_times (trip_id, stop_id);
+SELECT   
+	indexname,
+    indexdef 
+FROM 
+	pg_indexes 
+WHERE 
+	tablename = 'stop_times';
+	
 SELECT 
 	s1.stop_name AS departure, 
 	s2.stop_name AS arrival, 
@@ -108,14 +117,19 @@ WHERE
 -- SELECTIONNE TOUS LES STOP TIMES SANS DUPLICATAS DE STOP_ID
 
 SELECT
-	s,
+	s.stop_id,
+	s.stop_lat,
+	s.stop_lon,
 	st.departure_time,
 	st.stop_sequence,
-	f
+	s2.stop_id as transfer_stop_id,
+	s2.stop_lat as transfer_stop_lat,
+	s2.stop_lon as transfer_stop_lon
 FROM
 	stop_times AS st,
 	stops AS s
-	LEFT JOIN transfers AS f ON s.stop_id = f.from_stop_id,
+	LEFT JOIN transfers AS f ON s.stop_id = f.from_stop_id
+	LEFT JOIN stops as s2 on f.to_stop_id = s2.stop_id,
 	(SELECT
 		_st.stop_id,
 	 	_st.trip_id,
