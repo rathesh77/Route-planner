@@ -108,44 +108,13 @@
     <script src="./stations.js"></script>
     <script>
 
-        let map = L.map('map').setView([48.8534, 2.3488], 7)
-        let lineColors = {
-            'rer-a': '#DD5E3C',
-            'rer-b': 'blue',
-            'ligne-12': '#208e69',
-            'ligne-7': '#DF9AB1',
-            'ligne-3-bis': '#89C7D6',
-            'ligne-13': '#89C7D6',
-            'ligne-4': '#BB4D98',
-            'ligne-2': '#BB4D98',
-            'ligne-5': '#DE8B53',
-            'ligne-3': '#DE8B53',
-            'ligne-6': '#79BB92',
-            'ligne-7-bis': '#79BB92',
-            'ligne-11': '#8E6538',
-            'ligne-8': '#C5A3CA',
-            'ligne-14': '#67328E',
-            'ligne-1': '#F2C931',
-            'ligne-2': '#216EB4',
-            'ligne-9': '#F2C931',
-            'ligne-10': '#DFB039',
-            'tramway-3a': '#ed894d',
-            'tramway-3b': '#208e69'
-        }
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            minZoom: 10
-        }).addTo(map)
-
-        let layerGroup = L.layerGroup().addTo(map)
-
         function giveSuggestions(e, ns) {
             Array.from(document.getElementsByClassName('suggestions')).forEach((s) => { s.innerHTML = '' })
             const givenStation = e.target.value.trim()
             const regex = new RegExp(`^${givenStation}.{0,}$`, 'gi')
-            let matches = stations.filter((s) => s.match(regex))
+            let matches = stations.filter((s) => s.stop_name.match(regex))
             if (matches.length && givenStation.length) {
-                ns.nextSibling.innerHTML += matches.reduce((acc, curr) => `${acc}\n<li onclick='updateInput(event,this)'>${curr}</li>`, '')
+                ns.nextSibling.innerHTML += matches.reduce((acc, curr) => `${acc}\n<li onclick='updateInput(event,this)'>${curr.stop_name} ${(curr.stop_id)}</li>`, '')
             }
         }
         function updateInput(e, parent) {
@@ -153,6 +122,16 @@
             parent.parentNode.innerHTML = ''
 
         }
+
+        let map = L.map('map').setView([48.8534, 2.3488], 7)
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            minZoom: 10
+        }).addTo(map)
+
+        let layerGroup = L.layerGroup().addTo(map)
+
         function httpGetAsync(theUrl, callback, body) {
             var xmlHttp = new XMLHttpRequest()
             xmlHttp.onreadystatechange = function () {
@@ -166,8 +145,24 @@
         }
 
         function computePath() {
-            const departure = document.getElementById('departure_input').value
-            const destination = document.getElementById('destination_input').value
+            let departure = document.getElementById('departure_input').value
+            let destination = document.getElementById('destination_input').value
+            let temp = ''
+            for (const char of departure.split('').reverse().join('')) {
+                if (char == ' ')
+                    break
+                temp = char + temp
+            }
+            departure = temp
+
+            temp = ''
+            for (const char of destination.split('').reverse().join('')) {
+                if (char == ' ')
+                    break
+                temp = char + temp
+            }
+            destination = temp
+            console.log(departure, destination)
             const btnValidate = document.getElementById('btnValidate')
             btnValidate.disabled = true
             if (!departure || !destination) {
@@ -182,56 +177,27 @@
                     return
                 }
                 layerGroup.clearLayers()
-                const reducer = (acc, curr, index, elements) => {
-                    if (index < elements.length - 1 && index > 0) {
-                        if (curr.name.split(' ').splice(-1)[0] != elements[index - 1].name.split(' ').splice(-1)[0] && curr.name.split(' ').splice(-1)[0] != elements[index + 1].name.split(' ').splice(-1)[0]) {
-                            res.path.splice(index, 1)
-                            return acc
-                        }
-                    }
-                    acc.push([curr.lat, curr.lon])
+                const reducer = (acc, curr) => {
+                    acc.push([curr.stop_lat, curr.stop_lon])
                     return acc
                 }
-                const latlngs = res.path.reduce(reducer, [])
+                const latlngs = res.detailedPath.reduce(reducer, [])
+                console.log(latlngs)
+
                 map.fitBounds(latlngs, { minZoom: 10 })
-                res.path.forEach(element => {
-                    const { lat, lon, realName } = element
-                    let m = L.marker([lat, lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(realName)
+
+                res.detailedPath.forEach(element => {
+                    const stop_lat = element.stop_lat
+                    const stop_lon = element.stop_lon
+                    const stop_name = element.stop_name
+
+                    let m = L.marker([stop_lat, stop_lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(stop_name)
                     m.on('mouseover', function (e) {
                         this.openPopup()
                     })
                 })
 
-                let currentLine = res.path[0].name.split(' ').splice(-1)[0]
-                let headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
-                let listStations = ''
-                let station = res.path[0].name
-                let finalStr = 'Distance: ' + res.distanceTraveled.toFixed(2) + 'km</br>'
-                let coords = []
-                let line = null
-
-                res.path.forEach(element => {
-                    station = element.realName
-
-                    line = element.name.split(' ').splice(-1)[0]
-
-                    if (line == currentLine) {
-                        listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${lineColors[line]}'>${station}</div>`)
-                        coords.push([element.lat, element.lon])
-                    }
-                    else {
-                        coords.push([element.lat, element.lon])
-                        L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
-                        coords = [coords.slice(-1)[0]]
-                        finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat(`</ul>`)))
-                        listStations = ``
-                        currentLine = line
-                        headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
-                    }
-                })
-                finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat('</ul>')))
-                L.polyline(coords, { color: lineColors[currentLine], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
-                document.getElementById('path-indicator').innerHTML = finalStr
+                L.polyline(latlngs, { color: 'red', weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
             })
 
         }
