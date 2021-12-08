@@ -31,7 +31,7 @@ module.exports = class {
             let noeudsAdjacents = graph.getNoeuds().get(depart).getAdj()
             let distanceMin = noeudsAdjacents.values().next().value.getTete().get(depart).poids + totalDistance
             let prochainNoeudAPrendre = noeudsAdjacents.values().next().value.valeur
-            for (const noeud of noeudsAdjacents) {
+            for (const [key,noeud] of noeudsAdjacents) {
                 let prochaineDistance = noeud.getTete().get(depart).poids + totalDistance
                 let prochainNoeud = noeud.valeur
                 if (prochainNoeud == precedent) {
