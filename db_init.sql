@@ -164,3 +164,42 @@ FROM
 WHERE st.trip_id = sub.trip_id
 AND st.stop_id = s.stop_id
 ORDER BY stop_sequence;
+
+select
+	st.trip_id,
+	s.stop_id,
+	s.stop_name,
+	s.stop_desc,
+	stop_lat,
+	stop_lon,
+	cts,
+	st.stop_sequence
+FROM
+	(SELECT
+		st.stop_id,
+		min(st.trip_id) as trip_id,
+		cts
+	FROM
+		stop_times as st,
+		(
+		SELECT
+			trip_id,
+			count(stop_id) as cts
+		FROM
+			stop_times
+		GROUP BY trip_id
+		ORDER BY trip_id
+		) as sub
+	WHERE st.trip_id = sub.trip_id
+	GROUP BY st.stop_id, cts
+	order by st.stop_id) as sub,
+	stop_times as st,
+	stops as s
+WHERE st.stop_id = sub.stop_id
+AND s.stop_id = st.stop_id
+AND st.trip_id = sub.trip_id
+ORDER BY trip_id, st.stop_sequence
+
+	
+	
+	
