@@ -7,7 +7,26 @@ class Transfers {
      */
     static async getAll() {
         const result = await Postgres.client.query(
-            `SELECT * from ${this.tableName}`
+            `SELECT 
+                t.from_stop_id,
+                t.to_stop_id,
+                s1.stop_lat as from_stop_lat,
+                s1.stop_lon as from_stop_lon,
+                s1.stop_name as from_stop_name,
+                s1.stop_desc as from_stop_desc,
+
+                s2.stop_lat as to_stop_lat,
+                s2.stop_lon as to_stop_lon,
+                s2.stop_name as to_stop_name,
+                s2.stop_desc as to_stop_desc
+             from 
+                ${this.tableName} as t,
+                stops as s1,
+                stops as s2
+                where 
+                    s1.stop_id = t.from_stop_id
+                    and s2.stop_id = t.to_stop_id
+                `
         )
         return result.rows
     }

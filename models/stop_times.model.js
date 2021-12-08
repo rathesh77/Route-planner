@@ -12,35 +12,41 @@ class StopTimes {
     static async getAll() {
         const result = await Postgres.client.query(
             `
-            SELECT 
-                r.route_short_name,
-                r.route_long_name,
-                t.trip_id,
-                
-                s.stop_name,
-                
-                st.stop_id, 
-                st.departure_time,
-                st.stop_sequence
-            FROM 
-                ${this.tableName} AS st, 
-                ${Trips.tableName} as t,
-                ${Routes.tableName} as r,
-                ${Stops.tableName} as s,
-                (SELECT
-                    MIN(trip_id) AS trip_id, 
-                    stop_id
-                FROM 
-                    ${this.tableName}
-                GROUP BY stop_id
-                ORDER BY trip_id) AS sub
-            WHERE
-                r.route_id = t.route_id
-                AND t.trip_id = st.trip_id
-                AND s.stop_id = st.stop_id
-                AND st.stop_id = sub.stop_id
-                AND st.trip_id = sub.trip_id
-                AND r.route_long_name ILIKE '(CERGY-POISSY-SAINT GERMAIN EN LAYE <-> MARNE LA VALLEE-BOISSY SAINT LEGER) - Aller'
+            select
+            st.trip_id,
+            s.stop_id,
+            s.stop_name,
+            s.stop_desc,
+            stop_lat,
+            stop_lon,
+            cts,
+            st.stop_sequence
+        FROM
+            (SELECT
+                st.stop_id,
+                min(st.trip_id) as trip_id,
+                cts
+            FROM
+                stop_times as st,
+                (
+                SELECT
+                    trip_id,
+                    count(stop_id) as cts
+                FROM
+                    stop_times
+                GROUP BY trip_id
+                ORDER BY trip_id
+                ) as sub
+            WHERE st.trip_id = sub.trip_id
+            GROUP BY st.stop_id, cts
+            order by st.stop_id) as sub,
+            stop_times as st,
+            stops as s
+        WHERE st.stop_id = sub.stop_id
+        AND s.stop_id = st.stop_id
+        AND st.trip_id = sub.trip_id
+        ORDER BY trip_id, st.stop_sequence
+
             `
         )
         return result.rows
