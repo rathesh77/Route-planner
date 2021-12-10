@@ -173,12 +173,20 @@ select
 	stop_lat,
 	stop_lon,
 	cts,
-	st.stop_sequence
+	st.stop_sequence,
+	st.departure_time
 FROM
+
+(SELECT 
+ min(st2.trip_id) as trip_id, 
+ st2.departure_time , 
+ min(st2.stop_id) as stop_id, 
+ st.cts
+from
 	(SELECT
 		st.stop_id,
-		min(st.trip_id) as trip_id,
-		cts
+		cts,
+	 	min(st.departure_time) as departure_time
 	FROM
 		stop_times as st,
 		(
@@ -191,8 +199,28 @@ FROM
 		ORDER BY trip_id
 		) as sub
 	WHERE st.trip_id = sub.trip_id
+--	AND st.stop_id = 1636
 	GROUP BY st.stop_id, cts
 	order by st.stop_id) as sub,
+	(SELECT
+			trip_id,
+			count(stop_id) as cts,
+	 		min(departure_time) as departure_time
+		FROM
+			stop_times
+		GROUP BY trip_id
+		ORDER BY trip_id
+		) as st,
+	stop_times as st2
+WHERE 
+ 	st.cts = sub.cts
+ 	and st.trip_id = st2.trip_id 
+ 	and st2.stop_id = sub.stop_id
+ 	and st2.departure_time = sub.departure_time
+ 	group by st2.departure_time, st.cts
+ 	order by st.cts
+
+	) as sub,
 	stop_times as st,
 	stops as s
 WHERE st.stop_id = sub.stop_id
