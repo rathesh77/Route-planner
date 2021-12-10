@@ -19,24 +19,33 @@ app.listen(8080, async () => {
     await Postgres.init()
     await buildTreeFromDeparture()
     //console.log(Dijkstra.shortestPath(1636, 1885, graph))
-    console.log(graph.getNoeuds().get(2369))
     console.log('app started on port 8080');
 })
 
-app.get('/shortest_path/:departure/:destination',async (req, res) => {
+app.get('/shortest_path/:departure/:destination', async (req, res) => {
     const departure = parseInt(req.params['departure'])
     const destination = parseInt(req.params['destination'])
+    console.log(departure, destination)
+    if (!graph.getNoeuds().has(departure) || !graph.getNoeuds().has(destination)) {
+        res.send({ error: 'starting or ending stop not found' })
+        return
+    }
     const time = Date.now()
 
-    const {path, distanceTraveled} = Dijkstra.shortestPath(departure, destination, graph)
+    const { path, distanceTraveled } = Dijkstra.shortestPath(departure, destination, graph)
+    console.log(path)
+    if (path == undefined) {
+        res.send({ error: 'error' })
+        return
+    }
     const detailedPath = []
-    for (const p of path){
-        const {stop_id} = await Stops.findById(p)
+    for (const p of path) {
+        const { stop_id } = await Stops.findById(p)
         detailedPath.push(graph.getNoeuds().get(stop_id).getInfo())
     }
-    console.log(`temps total :${((Date.now() - time)/1000) / 60} minute.s`)
+    console.log(`temps total :${((Date.now() - time) / 1000) / 60} minute.s`)
 
-    res.send({distanceTraveled, detailedPath })
+    res.send({ distanceTraveled, detailedPath })
 })
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -60,9 +69,8 @@ async function buildTreeFromDeparture() {
     const stopTimes = await StopTimes.getAll()
     const transfers = await Transfers.getAll()
     let dictionary = new Map()
-    for (const t of transfers)
-    {
-        const {from_stop_name, from_stop_desc, to_stop_name, to_stop_desc,from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon} = t
+    for (const t of transfers) {
+        const { from_stop_name, from_stop_desc, to_stop_name, to_stop_desc, from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon } = t
         const sourceInfo = {
             stop_name: from_stop_name,
             stop_desc: from_stop_desc,
@@ -76,8 +84,8 @@ async function buildTreeFromDeparture() {
             stop_lon: to_stop_lon
         }
         graph.addPath(
-            from_stop_id, 
-            to_stop_id, 
+            from_stop_id,
+            to_stop_id,
             getDistanceFromLatLonInKm(from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon),
             sourceInfo,
             destInfo
@@ -85,7 +93,7 @@ async function buildTreeFromDeparture() {
         )
     }
     for (const st of stopTimes) {
-        const {stop_id,stop_name, stop_desc,stop_lat, stop_lon} = st
+        const { stop_id, stop_name, stop_desc, stop_lat, stop_lon } = st
         const sourceInfo = {
             stop_name: stop_name,
             stop_desc: stop_desc,
@@ -111,10 +119,10 @@ async function buildTreeFromDeparture() {
                     stop_lon: nextStop.stop_lon
                 }
                 graph.addPath(
-                    stop_id, 
-                    nextStop.stop_id, 
-                    getDistanceFromLatLonInKm(st.stop_lat, st.stop_lon, nextStop.stop_lat, nextStop.stop_lon), 
-                    sourceInfo, 
+                    stop_id,
+                    nextStop.stop_id,
+                    getDistanceFromLatLonInKm(st.stop_lat, st.stop_lon, nextStop.stop_lat, nextStop.stop_lon),
+                    sourceInfo,
                     destInfo
                 )
             }
@@ -129,19 +137,19 @@ async function buildTreeFromDeparture() {
                 }
 
                 graph.addPath(
-                    stop_id, 
-                    previousStop.stop_id, 
+                    stop_id,
+                    previousStop.stop_id,
                     getDistanceFromLatLonInKm(st.stop_lat, st.stop_lon, previousStop.stop_lat, previousStop.stop_lon),
-                    sourceInfo, 
+                    sourceInfo,
                     destInfo
-                 )
+                )
             }
-            dictionary.get(st.trip_id).set(st.stop_sequence, {stop_id, stop_name, stop_desc,stop_lat, stop_lon})
+            dictionary.get(st.trip_id).set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon })
 
         } else {
             dictionary.set(st.trip_id, new Map())
-            dictionary.get(st.trip_id).set(st.stop_sequence, {stop_id, stop_name, stop_desc, stop_lat, stop_lon})
+            dictionary.get(st.trip_id).set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon })
         }
-        
+
     }
 }
