@@ -18,7 +18,8 @@ class Transfers {
                 s2.stop_lat as to_stop_lat,
                 s2.stop_lon as to_stop_lon,
                 s2.stop_name as to_stop_name,
-                s2.stop_desc as to_stop_desc
+                s2.stop_desc as to_stop_desc,
+                min_transfer_time
              from 
                 ${this.tableName} as t,
                 stops as s1,

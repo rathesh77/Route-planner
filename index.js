@@ -18,7 +18,7 @@ let computedPaths = new Map()
 app.listen(8080, async () => {
     await Postgres.init()
     await buildTreeFromDeparture()
-    //console.log(Dijkstra.shortestPath(1636, 1885, graph))
+    console.log(graph.getNoeuds().get(2129))
     console.log('app started on port 8080');
 })
 
@@ -67,31 +67,8 @@ function deg2rad(deg) {
 }
 async function buildTreeFromDeparture() {
     const stopTimes = await StopTimes.getAll()
-    const transfers = await Transfers.getAll()
     let dictionary = new Map()
-    for (const t of transfers) {
-        const { from_stop_name, from_stop_desc, to_stop_name, to_stop_desc, from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon } = t
-        const sourceInfo = {
-            stop_name: from_stop_name,
-            stop_desc: from_stop_desc,
-            stop_lat: from_stop_lat,
-            stop_lon: from_stop_lon
-        }
-        const destInfo = {
-            stop_name: to_stop_name,
-            stop_desc: to_stop_desc,
-            stop_lat: to_stop_lat,
-            stop_lon: to_stop_lon
-        }
-        graph.addPath(
-            from_stop_id,
-            to_stop_id,
-            getDistanceFromLatLonInKm(from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon),
-            sourceInfo,
-            destInfo
-
-        )
-    }
+   
     for (const st of stopTimes) {
         const { stop_id, stop_name, stop_desc, stop_lat, stop_lon } = st
         const sourceInfo = {
@@ -106,22 +83,24 @@ async function buildTreeFromDeparture() {
         if (hasTrip) {
 
             const trip = dictionary.get(st.trip_id)
-            trip.set(st.stop_sequence, stop_id)
             const hasPreviousStop = trip.has(st.stop_sequence - 1)
             const hasNextStop = trip.has(st.stop_sequence + 1)
             if (hasNextStop) {
+                //console.log('next stop')
                 const nextStop = trip.get(st.stop_sequence + 1)
 
                 const destInfo = {
                     stop_name: nextStop.stop_name,
                     stop_desc: nextStop.stop_desc,
                     stop_lat: nextStop.stop_lat,
-                    stop_lon: nextStop.stop_lon
+                    stop_lon: nextStop.stop_lon,
+                    departure_time: nextStop.time
+
                 }
                 graph.addPath(
                     stop_id,
                     nextStop.stop_id,
-                    getDistanceFromLatLonInKm(st.stop_lat, st.stop_lon, nextStop.stop_lat, nextStop.stop_lon),
+                    Math.abs(getSecondsFromLocalTime(destInfo.departure_time) - getSecondsFromLocalTime(st.departure_time)) ,
                     sourceInfo,
                     destInfo
                 )
@@ -133,23 +112,31 @@ async function buildTreeFromDeparture() {
                     stop_name: previousStop.stop_name,
                     stop_desc: previousStop.stop_desc,
                     stop_lat: previousStop.stop_lat,
-                    stop_lon: previousStop.stop_lon
+                    stop_lon: previousStop.stop_lon,
+                    departure_time: previousStop.time
                 }
-
+                //console.log(Math.abs(getSecondsFromLocalTime(destInfo.departure_time) - getSecondsFromLocalTime(st.departure_time)))
                 graph.addPath(
                     stop_id,
                     previousStop.stop_id,
-                    getDistanceFromLatLonInKm(st.stop_lat, st.stop_lon, previousStop.stop_lat, previousStop.stop_lon),
+                    Math.abs(getSecondsFromLocalTime(destInfo.departure_time) - getSecondsFromLocalTime(st.departure_time)),
                     sourceInfo,
                     destInfo
                 )
             }
-            dictionary.get(st.trip_id).set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon })
+            trip.set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: st.departure_time })
 
         } else {
             dictionary.set(st.trip_id, new Map())
-            dictionary.get(st.trip_id).set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon })
+            dictionary.get(st.trip_id).set(st.stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: st.departure_time })
         }
 
     }
+}
+
+
+function getSecondsFromLocalTime(time){
+    //console.log(time)
+    return time.split(':').reduce((a, b, i) => i == 0 ? (+b * 3600) : i == 1 ? (a + (+b * 60)) : (+a + +b), 0)
+
 }

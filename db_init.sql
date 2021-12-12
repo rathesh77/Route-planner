@@ -196,6 +196,10 @@ from
 		FROM
 			stop_times
 		GROUP BY trip_id
+			HAVING
+	  	(substring(min(departure_time), 1, 2)::int >= EXTRACT(HOUR FROM NOW())
+	 		AND substring(min(departure_time), 4, 2)::int >= EXTRACT(MINUTE FROM NOW())
+		)
 		ORDER BY trip_id
 		) as sub
 	WHERE st.trip_id = sub.trip_id
@@ -208,7 +212,12 @@ from
 	 		min(departure_time) as departure_time
 		FROM
 			stop_times
-		GROUP BY trip_id
+	 	
+	 	GROUP BY trip_id
+	 	HAVING
+	  	(substring(min(departure_time), 1, 2)::int >= EXTRACT(HOUR FROM NOW())
+	 		AND substring(min(departure_time), 4, 2)::int >= EXTRACT(MINUTE FROM NOW())
+		)
 		ORDER BY trip_id
 		) as st,
 	stop_times as st2
@@ -228,6 +237,9 @@ AND s.stop_id = st.stop_id
 AND st.trip_id = sub.trip_id
 ORDER BY trip_id, st.stop_sequence
 
-	
-	
+SELECT LOCALTIME(0);
+
+SELECT substring('22:12:32', 4, 2)::int
+SELECT  EXTRACT(HOUR FROM NOW())
+select date_trunc('minute', now())::time
 	
