@@ -33,7 +33,7 @@ app.get('/shortest_path/:departure/:destination', async (req, res) => {
     const time = Date.now()
 
     const { path, distanceTraveled } = Dijkstra.shortestPath(departure, destination, graph)
-    console.log(path)
+    console.log(path, (distanceTraveled / 60) + " minutes")
     if (path == undefined) {
         res.send({ error: 'error' })
         return
@@ -67,8 +67,31 @@ function deg2rad(deg) {
 }
 async function buildTreeFromDeparture() {
     const stopTimes = await StopTimes.getAll()
+    const transfers = await Transfers.getAll()
     let dictionary = new Map()
-   
+    for (const t of transfers) {
+        const { from_stop_name, from_stop_desc, to_stop_name, to_stop_desc, from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon } = t
+        const sourceInfo = {
+            stop_name: from_stop_name,
+            stop_desc: from_stop_desc,
+            stop_lat: from_stop_lat,
+            stop_lon: from_stop_lon
+        }
+        const destInfo = {
+            stop_name: to_stop_name,
+            stop_desc: to_stop_desc,
+            stop_lat: to_stop_lat,
+            stop_lon: to_stop_lon
+        }
+        graph.addPath(
+            from_stop_id,
+            to_stop_id,
+            getDistanceFromLatLonInKm(from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon),
+            sourceInfo,
+            destInfo
+
+        )
+    }
     for (const st of stopTimes) {
         const { stop_id, stop_name, stop_desc, stop_lat, stop_lon } = st
         const sourceInfo = {
