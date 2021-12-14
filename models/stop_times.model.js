@@ -36,6 +36,10 @@ class StopTimes {
                 FROM
                     stop_times
                 GROUP BY trip_id
+					HAVING
+		  (substring(min(departure_time), 1, 2)::int >= EXTRACT(HOUR FROM NOW())
+			 AND substring(min(departure_time), 4, 2)::int >= EXTRACT(MINUTE FROM NOW())
+		)
                 ORDER BY trip_id
                 ) as sub
             WHERE st.trip_id = sub.trip_id
