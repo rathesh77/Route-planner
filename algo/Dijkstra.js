@@ -39,13 +39,13 @@ module.exports = class {
                 }
                 if (memoire.has(prochainNoeud)) {
 
-                    if (memoire.get(prochainNoeud).distanceParcouru > prochaineDistance) {
+                    if (memoire.get(prochainNoeud).distanceParcouru >= prochaineDistance) {
                         memoire.get(prochainNoeud).distanceParcouru = prochaineDistance
                         memoire.get(prochainNoeud).depuis = depart
                     }
                     continue
                 }
-                if (prochaineDistance < distanceMin) {
+                if (prochaineDistance <= distanceMin) {
                     prochainNoeudAPrendre = prochainNoeud
                     distanceMin = prochaineDistance
                 }
@@ -58,7 +58,7 @@ module.exports = class {
                 let prochaineDistance = debut.distanceParcouru
                 let prochainNoeud = fin
 
-                if (prochaineDistance < distanceMin) {
+                if (prochaineDistance <= distanceMin) {
                     prochainNoeudAPrendre = prochainNoeud
                     distanceMin = prochaineDistance
                     precedent = debut.depuis

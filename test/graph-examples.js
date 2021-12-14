@@ -1,5 +1,5 @@
 
-const Graph = require('./Graph')
+const Graph = require('../algo/Graph')
 let wikipediaExample = function () {
 
     let g = new Graph()
