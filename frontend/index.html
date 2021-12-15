@@ -162,43 +162,71 @@
                 temp = char + temp
             }
             destination = temp
-            console.log(departure, destination)
             const btnValidate = document.getElementById('btnValidate')
             btnValidate.disabled = true
             if (!departure || !destination) {
                 alert("you need to specify a valid departure and destination")
                 return
             }
-            httpGetAsync(`http://localhost:8080/shortest_path/${departure}/${destination}`, (response) => {
+            httpGetAsync(`http://192.168.0.44:8080/shortest_path/${departure}/${destination}`, (response) => {
                 btnValidate.disabled = false
                 let res = JSON.parse(response)
                 if (!res.distanceTraveled) {
                     alert(res.error)
                     return
                 }
+
                 layerGroup.clearLayers()
                 const reducer = (acc, curr) => {
                     acc.push([curr.stop_lat, curr.stop_lon])
                     return acc
                 }
                 const latlngs = res.detailedPath.reduce(reducer, [])
-                console.log(latlngs)
 
                 map.fitBounds(latlngs, { minZoom: 10 })
 
+                let currentLine = res.detailedPath[0].route_short_name
+                let headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
+                let listStations = ''
+                let station = res.detailedPath[0].stop_name
+                let finalStr = 'Durée: ' + (res.distanceTraveled / 60).toFixed(1) + ' minutes</br>'
+                let coords = []
+                let line = null
+                let colors = ['red', 'yellow', 'blue', 'green', 'purple']
+                let nthColor = 0
                 res.detailedPath.forEach(element => {
-                    const stop_lat = element.stop_lat
-                    const stop_lon = element.stop_lon
-                    const stop_name = element.stop_name
-                    const stop_desc = element.stop_desc
-
+                    const { stop_lat, stop_lon, stop_name, stop_desc, route_short_name } = element
+                    station = stop_name
+                    const line = route_short_name
                     let m = L.marker([stop_lat, stop_lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(`${stop_name}, ${stop_desc}`)
                     m.on('mouseover', function (e) {
                         this.openPopup()
                     })
-                })
 
-                L.polyline(latlngs, { color: 'red', weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
+                    if (line == currentLine) {
+                        listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${stop_name}</div>`)
+                        coords.push([stop_lat, stop_lon])
+                    }
+                    else {
+
+                        coords.push([stop_lat, stop_lon])
+                        L.polyline(coords, { color: colors[nthColor], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
+                        coords = [coords.slice(-1)[0]]
+                        finalStr = finalStr.concat(headTowardDirection.concat(`<b>${stop_name}</b><ul>`, listStations.concat(`</ul>`)))
+                        listStations = ``
+                        currentLine = line
+                        headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
+                        nthColor++
+                        if (nthColor == colors.length)
+                            nthColor = 0
+                    }
+
+
+                })
+                finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat('</ul>')))
+                L.polyline(coords, { color: colors[nthColor], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
+                document.getElementById('path-indicator').innerHTML = finalStr
+
             })
 
         }
