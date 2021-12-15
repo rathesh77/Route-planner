@@ -190,8 +190,9 @@
                     const stop_lat = element.stop_lat
                     const stop_lon = element.stop_lon
                     const stop_name = element.stop_name
+                    const stop_desc = element.stop_desc
 
-                    let m = L.marker([stop_lat, stop_lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(stop_name)
+                    let m = L.marker([stop_lat, stop_lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(`${stop_name}, ${stop_desc}`)
                     m.on('mouseover', function (e) {
                         this.openPopup()
                     })
