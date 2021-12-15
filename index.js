@@ -95,12 +95,13 @@ async function buildTreeFromDeparture() {
         )
     }
     for (const st of stopTimes) {
-        const { stop_id, stop_name, stop_desc, stop_lat, stop_lon, trip_id, stop_sequence, departure_time} = st
+        const { stop_id, stop_name, stop_desc, stop_lat, stop_lon, trip_id, stop_sequence, departure_time, route_short_name} = st
         const sourceInfo = {
-            stop_name: stop_name,
-            stop_desc: stop_desc,
-            stop_lat: stop_lat,
-            stop_lon: stop_lon
+            stop_name,
+            stop_desc,
+            stop_lat,
+            stop_lon,
+            route_short_name
         }
         const hasTrip = dictionary.has(trip_id)
         graph.addNoeud(stop_id, sourceInfo)
@@ -112,13 +113,14 @@ async function buildTreeFromDeparture() {
             const hasNextStop = trip.has(stop_sequence + 1)
             if (hasNextStop) {
                 const nextStop = trip.get(stop_sequence + 1)
-
+                
                 const destInfo = {
                     stop_name: nextStop.stop_name,
                     stop_desc: nextStop.stop_desc,
                     stop_lat: nextStop.stop_lat,
                     stop_lon: nextStop.stop_lon,
-                    departure_time: nextStop.time
+                    departure_time: nextStop.time,
+                    route_short_name: nextStop.route_short_name
 
                 }
                 graph.addPath(
@@ -137,7 +139,9 @@ async function buildTreeFromDeparture() {
                     stop_desc: previousStop.stop_desc,
                     stop_lat: previousStop.stop_lat,
                     stop_lon: previousStop.stop_lon,
-                    departure_time: previousStop.time
+                    departure_time: previousStop.time,
+                    route_short_name: previousStop.route_short_name
+
                 }
                 graph.addPath(
                     stop_id,
@@ -147,11 +151,11 @@ async function buildTreeFromDeparture() {
                     destInfo
                 )
             }
-            trip.set(stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: departure_time })
+            trip.set(stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: departure_time, route_short_name })
 
         } else {
             dictionary.set(trip_id, new Map())
-            dictionary.get(trip_id).set(stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: departure_time })
+            dictionary.get(trip_id).set(stop_sequence, { stop_id, stop_name, stop_desc, stop_lat, stop_lon, time: departure_time , route_short_name})
         }
 
     }

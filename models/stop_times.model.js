@@ -13,6 +13,7 @@ class StopTimes {
         const result = await Postgres.client.query(
             `
             select
+            r.route_short_name,
             st.trip_id,
             s.stop_id,
             s.stop_name,
@@ -46,10 +47,14 @@ class StopTimes {
             GROUP BY st.stop_id, cts
             order by st.stop_id) as sub,
             stop_times as st,
-            stops as s
+            trips as t,
+            stops as s,
+            routes as r
         WHERE st.stop_id = sub.stop_id
         AND s.stop_id = st.stop_id
         AND st.trip_id = sub.trip_id
+        and st.trip_id = t.trip_id
+        and t.route_id = r.route_id
         ORDER BY trip_id, st.stop_sequence
 
             `

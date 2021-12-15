@@ -17,6 +17,7 @@ module.exports = class Graph {
      */
     addNoeud(valeur, info) {
         if (this.noeuds.has(valeur)) {
+            this.noeuds.get(valeur).info = info
             return this.noeuds.get(valeur)
         }
         const newNoeud = new Noeud(valeur, info)
