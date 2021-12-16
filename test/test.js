@@ -1,5 +1,5 @@
-const Dijkstra = require('../Dijkstra')
-const graphExamples = require('../graph-examples.js')
+const Dijkstra = require('../algo/Dijkstra')
+const graphExamples = require('./graph-examples.js')
 
 let wikipediaExample = graphExamples[0]()
 let codeForGeeksExample = graphExamples[1]()
@@ -36,9 +36,9 @@ test('wikipediaExample', () => {
 })
 
 test('otherExample', () => {
-    expect(Dijkstra.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'B', 'D'] })
+    expect(Dijkstra.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'C', 'D'] })
     expect(Dijkstra.shortestPath('A', 'A', otherExample)).toStrictEqual('starting node and ending node are the same...')
-    expect(Dijkstra.shortestPath('A', 'F', otherExample)).toStrictEqual({ distanceTraveled: 9, path: ['A', 'B', 'D', 'F'] })
+    expect(Dijkstra.shortestPath('A', 'F', otherExample)).toStrictEqual({ distanceTraveled: 9, path: ['A', 'C', 'D', 'F'] })
 })
 
 test('transportEnCommun', () => {
