@@ -1,93 +1,90 @@
-const Noeud = require("./Noeud")
+const Node = require("./Node")
 
 module.exports = class {
     /**
-     * @param {String} depart 
-     * @param {String} destination 
+     * @param {String} departure 
+     * @param {String} arrival 
      * @param {Graph} graph
      * @returns {Object} { distanceTraveled, path }
      */
-    static shortestPath(depart, destination, graph) {
+    static shortestPath(departure, arrival, graph) {
 
-        if (!depart || !destination) {
+        if (!departure || !arrival) {
             return 'you need to specify two nodes'
         }
 
-        if (depart == destination) {
+        if (departure == arrival) {
             return 'starting node and ending node are the same...'
         }
-        if (!graph.getNoeuds().get(depart) || !graph.getNoeuds().get(destination)) {
+        if (!graph.getNodes().get(departure) || !graph.getNodes().get(arrival)) {
             return 'starting node or ending node not found...'
         }
 
-        let memoire = new Map()
-        let initialNode = depart
+        let memory = new Map()
+        let initialNode = departure
         let totalDistance = 0
-        let precedent = depart
+        let previousNode = departure
         let fullPath = new Map()
 
-        while (depart != destination) {
+        while (departure != arrival) {
             let temp = new Map()
-            let noeudsAdjacents = graph.getNoeuds().get(depart).getAdj()
-            let distanceMin = noeudsAdjacents.values().next().value.getTete().get(depart).poids + totalDistance
-            let prochainNoeudAPrendre = noeudsAdjacents.values().next().value.valeur
-            for (const [key,noeud] of noeudsAdjacents) {
-                let prochaineDistance = noeud.getTete().get(depart).poids + totalDistance
-                let prochainNoeud = noeud.valeur
-                if (prochainNoeud == precedent) {
+            let nexts = graph.getNodes().get(departure).getNexts()
+            let minDistance = nexts.values().next().value.getHeads().get(departure).weight + totalDistance
+            let nextNodeToTake = nexts.values().next().value.value
+            for (const node of nexts.values()) {
+                let nextDistance = node.getHeads().get(departure).weight + totalDistance
+                let nextNode = node.value
+                if (nextNode == previousNode) {
                     continue
                 }
-                if (memoire.has(prochainNoeud)) {
+                if (memory.has(nextNode)) {
 
-                    if (memoire.get(prochainNoeud).distanceParcouru >= prochaineDistance) {
-                        memoire.get(prochainNoeud).distanceParcouru = prochaineDistance
-                        memoire.get(prochainNoeud).depuis = depart
+                    if (memory.get(nextNode).travelledDistance >= nextDistance) {
+                        memory.get(nextNode).travelledDistance = nextDistance
+                        memory.get(nextNode).previousNode = departure
                     }
                     continue
                 }
-                if (prochaineDistance <= distanceMin) {
-                    prochainNoeudAPrendre = prochainNoeud
-                    distanceMin = prochaineDistance
+                if (nextDistance <= minDistance) {
+                    nextNodeToTake = nextNode
+                    minDistance = nextDistance
                 }
 
-                temp.set(prochainNoeud, { distanceParcouru: prochaineDistance, depuis: depart })
+                temp.set(nextNode, { travelledDistance: nextDistance, previousNode: departure })
             }
-            precedent = depart
+            previousNode = departure
 
-            for (const [fin, debut] of memoire) {
-                let prochaineDistance = debut.distanceParcouru
-                let prochainNoeud = fin
+            for (const [to, from] of memory) {
+                let nextDistance = from.travelledDistance
+                let nextNode = to
 
-                if (prochaineDistance <= distanceMin) {
-                    prochainNoeudAPrendre = prochainNoeud
-                    distanceMin = prochaineDistance
-                    precedent = debut.depuis
+                if (nextDistance <= minDistance) {
+                    nextNodeToTake = nextNode
+                    minDistance = nextDistance
+                    previousNode = from.previousNode
                 }
             }
 
-            memoire = new Map([...memoire, ...temp])
+            memory = new Map([...memory, ...temp])
 
 
-            if (memoire.has(prochainNoeudAPrendre)) {
-                memoire.delete(prochainNoeudAPrendre)
+            if (memory.has(nextNodeToTake)) {
+                memory.delete(nextNodeToTake)
             }
 
-            depart = prochainNoeudAPrendre
-            totalDistance = distanceMin
+            departure = nextNodeToTake
+            totalDistance = minDistance
 
-            if (!fullPath.has(prochainNoeudAPrendre))
-                fullPath.set(prochainNoeudAPrendre, precedent)
-            // repeter...
-
+            if (!fullPath.has(nextNodeToTake))
+                fullPath.set(nextNodeToTake, previousNode)
         }
-        //console.log(fullPath)
 
-        let path = [graph.getNoeuds().get(destination).getValeur()]
+        let path = [graph.getNodes().get(arrival).getValue()]
 
-        let end = destination
+        let end = arrival
         while (end != initialNode) {
             end = fullPath.get(end)
-            path.unshift(graph.getNoeuds().get(end).getValeur())
+            path.unshift(graph.getNodes().get(end).getValue())
         }
         
         return { distanceTraveled: totalDistance, path }

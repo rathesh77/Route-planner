@@ -5,7 +5,7 @@ let wikipediaExample = function () {
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
     for (let i = 0; i < nodes.length; i++)
-        g.addNoeud(nodes[i])
+        g.addNode(nodes[i])
 
     g.addPath('A', 'B', 85)
     g.addPath('B', 'F', 80)
@@ -27,7 +27,7 @@ let codeForGeeksExample = function () {
     let g = new Graph()
     const nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     for (let i = 0; i < nodes.length; i++)
-        g.addNoeud(nodes[i].toString())
+        g.addNode(nodes[i].toString())
 
     g.addPath('0', '1', 4)
     g.addPath('0', '7', 8)
@@ -53,7 +53,7 @@ let otherExample = function () {
     let g = new Graph()
     const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
     for (let i = 0; i < nodes.length; i++)
-        g.addNoeud(nodes[i])
+        g.addNode(nodes[i])
 
     g.addPath('A', 'B', 3)
     g.addPath('A', 'D', 9)
@@ -76,7 +76,7 @@ let transportEnCommun = function () {
     let g = new Graph()
     const nodes = ['Auber', 'Châtelet-Les Halles', 'Gare de Lyon', 'Pont Neuf', 'Châtelet', 'Pont Marie', 'Sully-Morland']
     for (let i = 0; i < nodes.length; i++)
-        g.addNoeud(nodes[i])
+        g.addNode(nodes[i])
     g.addPath('Auber', 'Châtelet-Les Halles', 3)
     g.addPath('Châtelet-Les Halles', 'Gare de Lyon', 4)
     g.addPath('Châtelet-Les Halles', 'Châtelet', 2)

@@ -8,7 +8,7 @@ const Graph = require('./algo/Graph')
 const Postgres = require('./db/Postgres')
 const StopTimes = require('./models/stop_times.model')
 const Transfers = require('./models/transfers.model')
-const Noeud = require('./algo/Noeud')
+const Node = require('./algo/Node')
 const Stops = require('./models/stops.model')
 app.use(cors())
 
@@ -18,7 +18,7 @@ let computedPaths = new Map()
 app.listen(8080, async () => {
     await Postgres.init()
     await buildTreeFromDeparture()
-    console.log(graph.getNoeuds().get(1670))
+    console.log(graph.getNodes().get(1670))
     console.log('app started on port 8080');
 })
 
@@ -26,7 +26,7 @@ app.get('/shortest_path/:departure/:destination', async (req, res) => {
     const departure = parseInt(req.params['departure'])
     const destination = parseInt(req.params['destination'])
     console.log(departure, destination)
-    if (!graph.getNoeuds().has(departure) || !graph.getNoeuds().has(destination)) {
+    if (!graph.getNodes().has(departure) || !graph.getNodes().has(destination)) {
         res.send({ error: 'starting or ending stop not found' })
         return
     }
@@ -41,7 +41,7 @@ app.get('/shortest_path/:departure/:destination', async (req, res) => {
     const detailedPath = []
     for (const p of path) {
         const { stop_id } = await Stops.findById(p)
-        detailedPath.push(graph.getNoeuds().get(stop_id).getInfo())
+        detailedPath.push(graph.getNodes().get(stop_id).getInfo())
     }
     console.log(`temps total pris par l'algorithme : ${((Date.now() - time) / 1000) / 60} minute.s`)
 
@@ -104,7 +104,7 @@ async function buildTreeFromDeparture() {
             route_short_name
         }
         const hasTrip = dictionary.has(trip_id)
-        graph.addNoeud(stop_id, sourceInfo)
+        graph.addNode(stop_id, sourceInfo)
 
         if (hasTrip) {
 

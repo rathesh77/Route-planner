@@ -1,50 +1,50 @@
 
-const Noeud = require('./Noeud')
+const Node = require('./Node')
 
 module.exports = class Graph {
 
     constructor() {
 
-        this.noeuds = new Map()
+        this.nodes = new Map()
     }
-    getNoeuds() {
-        return this.noeuds
+    getNodes() {
+        return this.nodes
     }
     /**
      * 
-     * @param {String} valeur 
-     * @returns {Noeud}
+     * @param {String} value 
+     * @returns {Node}
      */
-    addNoeud(valeur, info) {
-        if (this.noeuds.has(valeur)) {
-            this.noeuds.get(valeur).info = info
-            return this.noeuds.get(valeur)
+    addNode(value, info) {
+        if (this.nodes.has(value)) {
+            this.nodes.get(value).info = info
+            return this.nodes.get(value)
         }
-        const newNoeud = new Noeud(valeur, info)
-        this.noeuds.set(valeur, newNoeud)
-        return newNoeud
+        const newNode = new Node(value, info)
+        this.nodes.set(value, newNode)
+        return newNode
     }
     
     /**
      * 
      * @param {String} source 
      * @param {String} dest 
-     * @param {Number} poids 
+     * @param {Number} weight 
      * @returns {Array}
      */
-    addPath(source, dest, poids, sourceInfo, destInfo) {
-        //console.log(source, dest, poids, sourceInfo, destInfo)
-        if (poids == null) {
-            console.log('ajoutez un poids...')
+    addPath(source, dest, weight, sourceInfo, arrivalInfo) {
+        //console.log(source, dest, weight, sourceInfo, arrivalInfo)
+        if (weight == null) {
+            console.log('ajoutez un weight...')
             return
         }
-        const sourceNoeud = this.addNoeud(source, sourceInfo);
-        const destinationNoeud = this.addNoeud(dest, destInfo);
+        const sourceNode = this.addNode(source, sourceInfo);
+        const arrivalNode = this.addNode(dest, arrivalInfo);
 
-        sourceNoeud.addAdj(destinationNoeud, poids)
-        destinationNoeud.addAdj(sourceNoeud, poids)
+        sourceNode.addNext(arrivalNode, weight)
+        arrivalNode.addNext(sourceNode, weight)
 
-        return [sourceNoeud, destinationNoeud]
+        return [sourceNode, arrivalNode]
     }
 
 }
