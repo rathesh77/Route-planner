@@ -210,6 +210,8 @@
                         coords.push([stop_lat, stop_lon])
                         L.polyline(coords, { color: colors[nthColor], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
                         coords = [coords.slice(-1)[0]]
+                        if (listStations == '')
+                            listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${stop_name}</div>`)
                         finalStr = finalStr.concat(headTowardDirection.concat(`<b>${stop_name}</b><ul>`, listStations.concat(`</ul>`)))
                         listStations = ``
                         currentLine = line
