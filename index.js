@@ -70,18 +70,20 @@ async function buildTreeFromDeparture() {
     const transfers = await Transfers.getAll()
     let dictionary = new Map()
     for (const t of transfers) {
-        let {min_transfer_time, from_stop_name, from_stop_desc, to_stop_name, to_stop_desc, from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon } = t
+        let {min_transfer_time, from_stop_name, from_route_short_name, to_route_short_name,from_stop_desc, to_stop_name, to_stop_desc, from_stop_id, to_stop_id, from_stop_lat, from_stop_lon, to_stop_lat, to_stop_lon } = t
         const sourceInfo = {
             stop_name: from_stop_name,
             stop_desc: from_stop_desc,
             stop_lat: from_stop_lat,
-            stop_lon: from_stop_lon
+            stop_lon: from_stop_lon,
+            route_short_name: from_route_short_name
         }
         const destInfo = {
             stop_name: to_stop_name,
             stop_desc: to_stop_desc,
             stop_lat: to_stop_lat,
-            stop_lon: to_stop_lon
+            stop_lon: to_stop_lon,
+            route_short_name: to_route_short_name
         }
         if (min_transfer_time == 0)
             min_transfer_time = 1
