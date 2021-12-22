@@ -8,18 +8,19 @@ class AStar {
      * @returns {Object} { distanceTraveled, path }
      */
     static shortestPath(departure, arrival, g) {
-        
+
         //on declare 2 tableaux : openlist et closedlist
         let openList = [], closedList = []
         //on ajoute departure à openlist
-        g.getNodes().get(departure).cost = 0
-        g.getNodes().get(departure).heuristic = 0
+        const nodes = g.getNodes()
+        nodes.get(departure).cost = 0
+        nodes.get(departure).fscore = 0
 
         openList.push(departure)
         //tant que open list n'est pas vide
         while (openList.length > 0) {
             //on trouve le noeud ayant la plus faible heuristic, et on le retire de openlist
-            current = findMinFScoreAndRemoveItFromOpenList(openList, g)
+            let current = Utils.findMinFScoreAndRemoveItFromOpenList(openList, g)
             //si current est egal à arrival
             if (current == arrival) {
                 //on reconstruit le chemin (chemin = reconstructPath(D, graph))
@@ -27,37 +28,44 @@ class AStar {
                 return Utils.reconstructPath(current, g)
             }
             //pour chaque voisin 'V' du noeud courant "current"
-            const currentNode = g.getNodes().get(current)
+            const currentNode = nodes.get(current)
             for (const [V, node] of currentNode.getNexts()) {
+                // Si V est dans closedList, on l'ignore
                 if (Utils.isInList(V, closedList) != -1)
                     continue
                 const indexOfVInsideOpenList = Utils.isInList(V, openList)
-                const gscore = currentNode.cost + node.getHeads().get(V).weight
+                const gscore = currentNode.cost + node.getHeads().get(current).weight
                 const fscore = gscore + Utils.heuristic(V, arrival, g)
+                console.log(current, currentNode.cost, V, gscore, indexOfVInsideOpenList)
                 //si V n'est pas dans closedList ET ( (V est dans openList ET openList(F(V)) > F(V)) OU V n'est pas dans openList)) 
-                    //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
-                    //V.heuristic =  V.cout + hscore (V, arrival)
-                    //V.previous = current
-                    //on ajoute V à openList
+                //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
+                //V.heuristic =  V.cout + hscore (V, arrival)
+                //V.previous = current
+                //on ajoute V à openList
+                // Si V n'est pas dans openList OU V est dans openList avec un cout inferieur à celui precedemment calculé depuis un autre noeud predecesseur
                 if (indexOfVInsideOpenList == -1) {
+                    // On l'ajoute V dans openList
                     openList.push(V)
+                    // On met à jour le cout total pris pour arriver au noeud V
+                    node.cost = gscore
+                    // On met à jour l'heuristic (i.e le cout total + une estimation de la distance entre V et le noeud final)
+                    node.fscore = fscore
+                    // On met à jour le noeud precedent
+                    node.previous = current
+                } else if (nodes.get(openList[indexOfVInsideOpenList]).cost > gscore) {
                     node.cost = gscore
                     node.fscore = fscore
-                    node.previous = V
-                } else if (openList[indexOfVInsideOpenList].cost > gscore) {
-                    node.cost = gscore
-                    node.fscore = fscore
-                    node.previous = V
+                    node.previous = current
                 }
             }
             //on ajoute current dans closedList
             closedList.push(current)
         }
         //fin du programme (on a pas trouvé de chemin)
-        
-        return 0
+
+        return -1
     }
-    
+
 }
 
 /** Class representing helper functions for the A* algorithm */
@@ -70,12 +78,13 @@ class Utils {
      */
     static findMinFScoreAndRemoveItFromOpenList(openList, g) {
         let min = 0
+        const nodes = g.getNodes()
         for (let i = 0; i < openList.length; i++) {
-            if (g.getNodes().get(openList[i]).heuristic < g.getNodes().get(openList[min]).heuristic)
+            if (nodes.get(openList[i]).fscore < nodes.get(openList[min]).fscore)
                 min = i
         }
 
-        return openList.splice(i, 1)
+        return openList.splice(min, 1)[0]
     }
     /**
      * @param {String} V node to check presence 
@@ -83,19 +92,19 @@ class Utils {
      * @returns {Number} index of the node inside the array
      */
     static isInList(V, list) {
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].value == V)
+        for (let i = 0; i < list.length; i++)
+            if (list[i] == V)
                 return i
-        }
         return -1
     }
-
+    
     /**
      * @param {String} n1 first node
      * @param {String} n2 second node
      * @param {Graph} g graph
      * @returns {Number} a safe estimate of the distance between n1 and n2
      */
+    // TODO
     static heuristic(n1, n2, g) {
         return 0
     }
@@ -107,13 +116,15 @@ class Utils {
      */
     static reconstructPath(n, g) {
         let path = []
-        let curr = g.getNodes().get(n)
+        const nodes = g.getNodes()
+        let curr = nodes.get(n)
+        const distanceTraveled = curr.cost
         path.push(curr.value)
         while (curr.previous != null) {
-            curr = g.getNodes().get(curr.previous)
+            curr = nodes.get(curr.previous)
             path.unshift(curr.value)
         }
-        return path
+        return { distanceTraveled, path }
     }
 }
 module.exports = AStar
