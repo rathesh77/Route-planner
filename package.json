@@ -269,7 +269,7 @@
     "start": "nodemon index.js",
     "test": "jest test/test.js",
     "test-astar": "jest test/AStar.test.js",
-    "generate-doc": "./node_modules/.bin/jsdoc algo/*"
+    "generate-doc": "./node_modules/.bin/jsdoc -d doc algo/*"
   },
   "repository": {
     "type": "git",
