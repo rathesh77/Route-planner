@@ -36,9 +36,9 @@ test('wikipediaExample', () => {
 })
 
 test('otherExample', () => {
-    expect(AStar.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'C', 'D'] })
+    expect(AStar.shortestPath('A', 'D', otherExample)).toStrictEqual({ distanceTraveled: 7, path: ['A', 'B', 'D'] })
     expect(AStar.shortestPath('A', 'A', otherExample)).toStrictEqual('starting node and ending node are the same...')
-    expect(AStar.shortestPath('A', 'F', otherExample)).toStrictEqual({ distanceTraveled: 9, path: ['A', 'C', 'D', 'F'] })
+    expect(AStar.shortestPath('A', 'F', otherExample)).toStrictEqual({ distanceTraveled: 9, path: ['A', 'B', 'D', 'F'] })
 })
 
 test('transportEnCommun', () => {
