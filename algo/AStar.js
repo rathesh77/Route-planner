@@ -107,7 +107,6 @@ AStar.isInList = function (V, list) {
     return -1
 }
 
-// TODO
 /**
  * @param {String} n1 first node
  * @param {String} n2 second node
@@ -115,6 +114,7 @@ AStar.isInList = function (V, list) {
  * @returns {Number} a safe estimate of the distance between n1 and n2
  */
 AStar.heuristic = function (n1, n2, g) {
+    // TODO
     return 0
 }
 
@@ -125,11 +125,10 @@ AStar.heuristic = function (n1, n2, g) {
  * @returns {Array} path
  */
 AStar.reconstructPath = function (n, g) {
-    let path = []
     const nodes = g.getNodes()
     let curr = nodes.get(n)
     const distanceTraveled = curr.cost
-    path.push(curr.value)
+    const path = [curr.value]
     while (curr.previous != null) {
         curr = nodes.get(curr.previous)
         path.unshift(curr.value)
