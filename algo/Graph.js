@@ -1,19 +1,25 @@
-
 const Node = require('./Node')
+/** Class representing a non-oriented graph. */
+class Graph {
 
-module.exports = class Graph {
-
+    /**
+     * Creates a graph.
+     */
     constructor() {
 
         this.nodes = new Map()
     }
+
+    /**
+     * returns the nodes part of the graph.
+     */
     getNodes() {
         return this.nodes
     }
     /**
-     * 
+     * adds a node to the graph
      * @param {String} value 
-     * @returns {Node}
+     * @returns {Node} the node that got added
      */
     addNode(value, info) {
         if (this.nodes.has(value)) {
@@ -26,7 +32,7 @@ module.exports = class Graph {
     }
     
     /**
-     * 
+     * adds a bidirectional weighted path between source node and dest node
      * @param {String} source 
      * @param {String} dest 
      * @param {Number} weight 
@@ -48,3 +54,5 @@ module.exports = class Graph {
     }
 
 }
+
+module.exports = Graph

@@ -1,11 +1,11 @@
-const Node = require("./Node")
-
-module.exports = class {
+/** Class representing the Dijkstra algorithm. */
+class Dijkstra {
     /**
+     * returns the most optimal path from departure and arrival
      * @param {String} departure 
      * @param {String} arrival 
      * @param {Graph} graph
-     * @returns {Object} { distanceTraveled, path }
+     * @returns {Object} { distanceTraveled: any, path: Array }
      */
     static shortestPath(departure, arrival, graph) {
 
@@ -91,3 +91,5 @@ module.exports = class {
     }
 
 }
+
+module.exports = Dijkstra
