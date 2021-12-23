@@ -213,12 +213,12 @@
                         finalStr = finalStr.concat(headTowardDirection.concat(`<b>${previous}</b><ul>`, listStations.concat(`</ul>`)))
                         coords.push([stop_lat, stop_lon])
                         L.polyline(coords, { color: colors[nthColor], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
+                        nthColor++
                         coords = [coords.slice(-1)[0]]
                         listStations = ``
                         currentLine = line
                         headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
                         listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${stop_name}</div>`)
-                        nthColor++
                         if (nthColor == colors.length)
                             nthColor = 0
                     }
