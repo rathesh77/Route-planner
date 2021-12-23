@@ -41,7 +41,7 @@ const heuristic = function (n1, n2, g) {
         const lon2 = end.info.stop_lon
         const dist = getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2)
 
-        const avgSpeedOfPublicTransports = 30/3600 // km/s
+        const avgSpeedOfPublicTransports = (begin.value + '').length == 4 ? 42/3600 : 20/3600 // km/s
         const approxTravelTime = dist / avgSpeedOfPublicTransports
         return approxTravelTime
     } catch(e) {

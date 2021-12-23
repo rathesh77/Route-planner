@@ -192,10 +192,12 @@
                 let line = null
                 let colors = ['red', 'orange', 'blue', 'green', 'purple']
                 let nthColor = 0
+                let previous = station
                 res.detailedPath.forEach(element => {
                     const { stop_lat, stop_lon, stop_name, stop_desc, route_short_name } = element
                     station = stop_name
                     const line = route_short_name
+
                     let m = L.marker([stop_lat, stop_lon], { riseOnHover: true }).addTo(layerGroup).bindPopup(`${stop_name}, ${stop_desc}`)
                     m.on('mouseover', function (e) {
                         this.openPopup()
@@ -206,21 +208,21 @@
                         coords.push([stop_lat, stop_lon])
                     }
                     else {
-
+                        if (listStations == '')
+                            listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${previous}</div>`)
+                        finalStr = finalStr.concat(headTowardDirection.concat(`<b>${previous}</b><ul>`, listStations.concat(`</ul>`)))
                         coords.push([stop_lat, stop_lon])
                         L.polyline(coords, { color: colors[nthColor], weight: 7, opacity: 1, stroke: true }).addTo(layerGroup)
                         coords = [coords.slice(-1)[0]]
-                        if (listStations == '')
-                            listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${stop_name}</div>`)
-                        finalStr = finalStr.concat(headTowardDirection.concat(`<b>${stop_name}</b><ul>`, listStations.concat(`</ul>`)))
                         listStations = ``
                         currentLine = line
                         headTowardDirection = `Prenez <span class='line-name'>${currentLine}</span> en direction de `
+                        listStations = listStations.concat(`<div class='station-name' style='border-left:3px dashed ${colors[nthColor]}'>${stop_name}</div>`)
                         nthColor++
                         if (nthColor == colors.length)
                             nthColor = 0
                     }
-
+                    previous = station
 
                 })
                 finalStr = finalStr.concat(headTowardDirection.concat(`<b>${station}</b><ul>`, listStations.concat('</ul>')))
