@@ -43,25 +43,16 @@ class AStar {
                 const indexOfVInsideOpenList = AStar.isInList(V, openList)
                 const gscore = currentNode.cost + node.getHeads().get(current).weight
                 const fscore = gscore + heuristic(V, arrival, g)
-                //console.log(current, currentNode.cost, V, gscore, indexOfVInsideOpenList)
-                //si V n'est pas dans closedList ET ( (V est dans openList ET openList(F(V)) > F(V)) OU V n'est pas dans openList)) 
-                //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
-                //V.heuristic =  V.cout + hscore (V, arrival)
-                //V.previous = current
-                //on ajoute V à openList
-                // Si V n'est pas dans openList OU V est dans openList avec un cout inferieur à celui precedemment calculé depuis un autre noeud predecesseur
-                if (indexOfVInsideOpenList == -1) {
-                    // On l'ajoute V dans openList
+                if (indexOfVInsideOpenList == -1 || nodes.get(openList[indexOfVInsideOpenList]).cost > gscore) {
+                    if (indexOfVInsideOpenList != -1)
+                        openList.splice(indexOfVInsideOpenList, 1)
+                    //on ajoute V à openList
                     openList.push(V)
-                    // On met à jour le cout total pris pour arriver au noeud V
+                    //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
                     node.cost = gscore
-                    // On met à jour l'heuristic (i.e le cout total + une estimation de la distance entre V et le noeud final)
+                    //V.heuristic =  V.cout + hscore (V, arrival)
                     node.fscore = fscore
-                    // On met à jour le noeud precedent
-                    node.previous = current
-                } else if (nodes.get(openList[indexOfVInsideOpenList]).cost > gscore) {
-                    node.cost = gscore
-                    node.fscore = fscore
+                    //V.previous = current
                     node.previous = current
                 }
             }
