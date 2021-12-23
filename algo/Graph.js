@@ -9,7 +9,6 @@ class Graph {
 
         this.nodes = new Map()
     }
-
     /**
      * returns the nodes part of the graph.
      */
