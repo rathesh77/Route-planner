@@ -8,11 +8,14 @@ class AStar {
      * @param {Graph} graph
      * @returns {Object} { distanceTraveled, path }
      */
-    static shortestPath(departure, arrival, g) {
+    static shortestPath(departure, arrival, g, heuristic) {
         if (departure == arrival)
             return 'starting node and ending node are the same...'
+        if (heuristic == null) {
+            heuristic = () => 0
+        }
         //on declare 2 tableaux : openlist et closedlist
-        let openList = [], closedList = [], visitedNodes = []
+        let openList = [], closedList = []
         //on ajoute departure à openlist
         const nodes = g.getNodes()
         nodes.get(departure).cost = 0
@@ -24,18 +27,11 @@ class AStar {
         while (openList.length > 0) {
             //on trouve le noeud ayant la plus faible heuristic, et on le retire de openlist
             let current = AStar.findMinFScoreAndRemoveItFromOpenList(openList, g)
-            visitedNodes.push(current)
             //si current est egal à arrival
             if (current == arrival) {
                 //on reconstruit le chemin (chemin = reconstructPath(D, graph))
                 //on arrête le programme car on a trouvé un chemin optimal (en retnournant le chemin)
                 const path = AStar.reconstructPath(current, g)
-                for (const n of visitedNodes) {
-                    const node = nodes.get(n)
-                    node.cost = null
-                    node.fscore = null
-                    node.previous = null
-                }
                 return path
             }
             //pour chaque voisin 'V' du noeud courant "current"
@@ -46,7 +42,7 @@ class AStar {
                     continue
                 const indexOfVInsideOpenList = AStar.isInList(V, openList)
                 const gscore = currentNode.cost + node.getHeads().get(current).weight
-                const fscore = gscore + AStar.heuristic(V, arrival, g)
+                const fscore = gscore + heuristic(V, arrival, g)
                 //console.log(current, currentNode.cost, V, gscore, indexOfVInsideOpenList)
                 //si V n'est pas dans closedList ET ( (V est dans openList ET openList(F(V)) > F(V)) OU V n'est pas dans openList)) 
                 //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
@@ -68,7 +64,6 @@ class AStar {
                     node.fscore = fscore
                     node.previous = current
                 }
-                visitedNodes.push(V)
             }
             //on ajoute current dans closedList
             closedList.push(current)
@@ -105,17 +100,6 @@ AStar.isInList = function (V, list) {
         if (list[i] == V)
             return i
     return -1
-}
-
-/**
- * @param {String} n1 first node
- * @param {String} n2 second node
- * @param {Graph} g graph
- * @returns {Number} a safe estimate of the distance between n1 and n2
- */
-AStar.heuristic = function (n1, n2, g) {
-    // TODO
-    return 0
 }
 
 /**

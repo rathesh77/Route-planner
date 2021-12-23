@@ -2,19 +2,53 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 
-const Dijkstra = require('./algo/Dijkstra')
+const AStar = require('./algo/AStar')
 const Graph = require('./algo/Graph')
 
 const Postgres = require('./db/Postgres')
 const StopTimes = require('./models/stop_times.model')
 const Transfers = require('./models/transfers.model')
-const Node = require('./algo/Node')
 const Stops = require('./models/stops.model')
 app.use(cors())
 
 let graph = new Graph()
-let stations = {}
-let computedPaths = new Map()
+const heuristic = function (n1, n2, g) {
+    
+    const getDistanceFromLatLonInKm = function(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+            ;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+        return d;
+    }
+
+    const deg2rad = function(deg) {
+        return deg * (Math.PI / 180)
+    }
+    try {
+        const begin = g.getNodes().get(n1)
+        const end = g.getNodes().get(n2)
+
+        const lat1 = begin.info.stop_lat
+        const lon1 = begin.info.stop_lon
+        const lat2 = end.info.stop_lat
+        const lon2 = end.info.stop_lon
+        const dist = getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2)
+
+        const avgSpeedOfPublicTransports = 30/3600 // km/s
+        const approxTravelTime = dist / avgSpeedOfPublicTransports
+        return approxTravelTime
+    } catch(e) {
+        //console.log(e)
+        return 0
+    }
+}
 app.listen(8080, async () => {
     await Postgres.init()
     await buildTreeFromDeparture()
@@ -32,7 +66,7 @@ app.get('/shortest_path/:departure/:destination', async (req, res) => {
     }
     const time = Date.now()
 
-    const { path, distanceTraveled } = Dijkstra.shortestPath(departure, destination, graph)
+    const { path, distanceTraveled } = AStar.shortestPath(departure, destination, graph, heuristic)
     console.log(path, (distanceTraveled / 60) + " minutes")
     if (path == undefined) {
         res.send({ error: 'error' })
@@ -48,19 +82,6 @@ app.get('/shortest_path/:departure/:destination', async (req, res) => {
     res.send({ distanceTraveled, detailedPath })
 })
 
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        ;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
-    return d;
-}
 
 function deg2rad(deg) {
     return deg * (Math.PI / 180)
