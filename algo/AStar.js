@@ -44,10 +44,9 @@ class AStar {
                 const gscore = currentNode.cost + node.getHeads().get(current).weight
                 const fscore = gscore + heuristic(V, arrival, g)
                 if (indexOfVInsideOpenList == -1 || nodes.get(openList[indexOfVInsideOpenList]).cost > gscore) {
-                    if (indexOfVInsideOpenList != -1)
-                        openList.splice(indexOfVInsideOpenList, 1)
                     //on ajoute V à openList
-                    openList.push(V)
+                    if (indexOfVInsideOpenList == -1)
+                        openList.push(V)
                     //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
                     node.cost = gscore
                     //V.heuristic =  V.cout + hscore (V, arrival)
