@@ -172,6 +172,8 @@
                 return
             }
             httpGetAsync(`http://localhost:8080/shortest_path/${departure}/${destination}`, (response) => {
+                if (response == '')
+                    return
                 btnValidate.disabled = false
                 let res = JSON.parse(response)
                 if (!res.distanceTraveled) {
