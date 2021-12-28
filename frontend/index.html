@@ -69,14 +69,103 @@
             color: black;
         }
 
-        li {
+        li:not(#path *) {
             padding: 5px;
+        }
+        li {
+            display: inline-block;
+        }
+        #wrapper {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 800px;
+            background-color: black;
+            z-index: 2;
+        }
 
+        #wrapper, #path {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #path {
+            min-width: 1000px;
+            height: inherit;
+            background-color: white;
+            border-top-left-radius: 100px;
+            border-top-right-radius: 100px;
+            flex-direction: column;
+        }
+
+        .round {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid black;
+            background-color: white;
+            position: relative;
+            bottom:10px
+            
+        }
+        #rounds-row .round-cell::before {
+            content: '';
+            position: relative;
+            height: 3px;
+            width: inherit;
+            background-color: black;
+            top: 8px;
+            z-index: -1;
+            display: inline-block;
+        }
+        
+        #rounds-row .round-cell.last::before {
+            width: 40px;
+            background-color: black;
+            margin-right: 70px;
+        }
+        #rounds-row .round-cell.first::before {
+            width: 40px;
+            background-color: black;
+            margin-left: 40px;
+        }
+        
+        
+        td {
+            width: 80px;
+            text-align: center; 
+            vertical-align: middle;
+            z-index: 1;
+            word-wrap: break-word;
+        }
+        tr {
+            display: flex;
+        }
+
+        #rounds-row .round-cell.last::after {
+            content: '';
+            position: absolute;
+            border: 0px;
+            border-top: 1px solid orange;
+            border-right: 1px solid orange;
+            border-top-right-radius: 30px;
+            width: 23px;
+            height: 90px;
+        } 
+
+        *:not(input) {
+            -webkit-user-select: none;  /* Chrome all / Safari all */
+            -moz-user-select: none;     /* Firefox all */
+            -ms-user-select: none;      /* IE 10+ */
+            user-select: none;       
         }
     </style>
+    
 </head>
 
 <body>
+    <!--
     <div id="left-pan">
 
         <div style="padding: 20px; box-shadow: 0 0px 5px 1px silver;">
@@ -99,8 +188,50 @@
         </div>
         <div id="path-indicator"></div>
     </div>
+    -->
+    <div id="wrapper">
+        <div id="path">
+                <table>
+                    <tr id="rounds-row">
+                        <td class="round-cell first"><div class="round"></div></td>
+                        <td class="round-cell">
+                            <div class="round">
+                                    
+                                </div>
+                        </td>
+                        <td class="round-cell"><div class="round"></div></td>
+                        <td class="round-cell"><div class="round"></div></td>
+                        <td class="round-cell last"><div class="round">
+                            <table style="position: relative; top: 70px;">
+                                <tr id="rounds-row">
+                                    <td class="round-cell first"><div class="round"></div></td>
+                                    <td class="round-cell"><div class="round"></div></td>
+                                    <td class="round-cell"><div class="round"></div></td>
+                                    <td class="round-cell"><div class="round"></div></td>
+                                    <td class="round-cell last"><div class="round"></div></td>
+                                </tr>
+                                <tr id="nodes-row">
+                                    <td class="node">testrddssdddddddddd</td>
+                                    <td class="node">a</td>
+                                    <td class="node">a</td>
+                                    <td class="node">a</td>
+                                    <td class="node">a</td>
+            
+                                </tr>
+                            </table>
+                        </div></td>
+                    </tr>
+                    <tr id="nodes-row">
+                        <td class="node">testrddssdddddddddd</td>
+                        <td class="node">a</td>
+                        <td class="node">a</td>
+                        <td class="node">a</td>
+                        <td class="node">assss</td>
 
-
+                    </tr>
+                </table>
+        </div>
+    </div>
     <div id="map">
 
     </div>
