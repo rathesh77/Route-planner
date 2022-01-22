@@ -26,7 +26,7 @@ class AStar {
         //tant que open list n'est pas vide
         while (openList.length > 0) {
             //on trouve le noeud ayant la plus faible heuristic, et on le retire de openlist
-            let current = AStar.findMinFScoreAndRemoveItFromOpenList(openList, g)
+            let current = openList.shift()
             //si current est egal à arrival
             if (current == arrival) {
                 //on reconstruit le chemin (chemin = reconstructPath(D, graph))
@@ -44,15 +44,15 @@ class AStar {
                 const gscore = currentNode.cost + node.getHeads().get(current).weight
                 const fscore = gscore + heuristic(V, arrival, g)
                 if (indexOfVInsideOpenList == -1 || nodes.get(openList[indexOfVInsideOpenList]).cost > gscore) {
-                    //on ajoute V à openList
-                    if (indexOfVInsideOpenList == -1)
-                        openList.push(V)
                     //V.Cout = D.cout +  costBetweenDAndCurrent <- costBetweenDAndCurrent = temps qu'on prend pour aller de current vers V
                     node.cost = gscore
                     //V.heuristic =  V.cout + hscore (V, arrival)
                     node.fscore = fscore
                     //V.previous = current
                     node.previous = current
+                    //on ajoute V à openList
+                    if (indexOfVInsideOpenList == -1)
+                        AStar.addNodeToList(V, openList, g)
                 }
             }
             //on ajoute current dans closedList
@@ -65,21 +65,23 @@ class AStar {
 }
 
 /**
- * @param {Array} openList 
+ * @param {String} node 
+ * @param {Array} list 
  * @param {Graph} g 
- * @returns {String} node that has the minimum fscore (i.e heuristic)
+ * @returns {String} add node to list
  */
-AStar.findMinFScoreAndRemoveItFromOpenList = function (openList, g) {
-    let min = 0
+ AStar.addNodeToList = function (node, list, g) {
     const nodes = g.getNodes()
-    for (let i = 0; i < openList.length; i++) {
-        if (nodes.get(openList[i]).fscore < nodes.get(openList[min]).fscore)
-            min = i
+    const fscore = nodes.get(node).fscore
+    for (let i = 0; i < list.length; i++) {
+        if (nodes.get(list[i]).fscore >= fscore) {
+            list.splice(i, 0, node)
+            return list
+        }
     }
-
-    return openList.splice(min, 1)[0]
+    list.push(node)
+    return list.length - 1
 }
-
 /**
  * @param {String} V node to check presence 
  * @param {Array} list the array to check the presence of V
